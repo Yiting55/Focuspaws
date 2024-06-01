@@ -2,11 +2,16 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:focuspaws/features/user_auth/pages/user_auth.dart';
+import 'package:focuspaws/features/user_auth/user_auth.dart';
 
-class HomePage extends StatelessWidget {
-  HomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
+  @override 
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final User? user = Auth().currentUser;
 
   Future<void> signOut() async {
@@ -18,12 +23,13 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _userId() {
-    return Text(user?.email ?? 'User email');
+    return Text('signed in as: ${user!.email!}');
   }
   
   Widget _signOutButton() {
-    return ElevatedButton(
-      onPressed: signOut, 
+    return MaterialButton(
+      onPressed: signOut,
+      color: Colors.orange, 
       child: const Text('Sign Out'),
     );
   }
