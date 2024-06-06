@@ -1,7 +1,9 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 //import 'package:focuspaws/features/Login_page.dart';
-import 'package:focuspaws/features/pages/login_page.dart';
-import 'package:focuspaws/features/pages/register_page.dart';
+import 'package:focuspaws/features/user_auth/login_page.dart';
+import 'package:focuspaws/features/user_auth/register_page.dart';
 
 class SigninOrRegisterPage extends StatefulWidget {
   const SigninOrRegisterPage({super.key});
@@ -17,7 +19,6 @@ class _SigninOrRegisterPageState extends State<SigninOrRegisterPage> {
     setState(() {
       showLoginPage = !showLoginPage;
     });
-
   }
 
   @override
@@ -28,5 +29,4 @@ class _SigninOrRegisterPageState extends State<SigninOrRegisterPage> {
       return RegisterPage(showLoginPage: toggleScreen);
     }
   }
-  
 }

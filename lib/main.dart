@@ -1,24 +1,34 @@
-// ignore_for_file: prefer_const_constructors, avoid_print
+// ignore_for_file: prefer_const_constructors, avoid_print, unused_import
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:focuspaws/features/pages/home_page.dart';
+import 'package:focuspaws/features/user_auth/login_page.dart';
+import 'package:focuspaws/features/user_auth/signinorregister_page.dart';
+import 'package:focuspaws/features/user_auth/user_auth.dart';
+import 'package:focuspaws/features/widget_tree.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 //import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 //import 'package:focuspaws/features/app/splash_screen/splash_screen.dart';
 //import 'package:focuspaws/features/login_page.dart';
-import 'package:focuspaws/features/widget_tree.dart';
+import 'package:focuspaws/features/onboarding/onboarding_view.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool onboarding = prefs.getBool("onboarding") ?? false;
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(MyApp(onboarding: onboarding));
 }
 
-
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool onboarding;
+  const MyApp({super.key, this.onboarding = false});
 
   // This widget is the root of your application.
   
@@ -30,10 +40,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color.fromARGB(255, 245, 200, 41),
       ),
-      home: const WidgetTree(),
-      //SplashScreen(
-        //child: LoginPage(),
-      //),      
+      home: StreamBuilder<User?>(
+        stream: Auth().authStateChanges,
+        builder: (context, snapshot) {
+          if(snapshot.hasData) {
+            //if (onboarding){
+              //return OnboardingView();
+            //} else {
+            return const HomePage();
+          }
+          //} else {
+          return const SigninOrRegisterPage();
+          }
+        
+      ),
     );
   }
-}
+}     

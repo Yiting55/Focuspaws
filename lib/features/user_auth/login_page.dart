@@ -1,14 +1,15 @@
-// ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:focuspaws/features/pages/forgotpassword_page.dart';
+import 'package:focuspaws/features/user_auth/forgotpassword_page.dart';
+//import 'package:focuspaws/features/user_auth/register_page.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:focuspaws/features/user_auth/user_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showRegisterPage;
-  const LoginPage({super.key,required this.showRegisterPage});
+  const LoginPage({super.key, required this.showRegisterPage});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -17,22 +18,44 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String? errorMessage = '';
   bool isLogin = true;
+  //bool showLoginPage = true;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   Future<void> signIn() async {
+    showDialog(
+      context: context, 
+      builder: (context){
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      });
+
     try {
       await Auth().signInWithEmailandPassword(
         email: emailController.text.trim(), 
         password: passwordController.text.trim(),
       );
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
+      Navigator.pop(context);
+      
+      showDialog(
+        context: context, 
+        builder: (context) {
+          return AlertDialog(
+            content: Text(e.code),
+          );
+        });
     }
   }
+
+  //void toggleScreen() {
+    //setState(() {
+      //showLoginPage = !showLoginPage;
+    //});
+  //}
 
   @override 
   void dispose() {
@@ -88,9 +111,9 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _header(),
-                const SizedBox(height: 20),
+                //const SizedBox(height: 0),
                 _icon(),
-                const SizedBox(height: 20),
+                //const SizedBox(height: 0),
                 _inputFieldEmail("Enter your Username", emailController),
                 const SizedBox(height: 10),
                 _inputFieldPassword("Enter your Password", passwordController, isPassword: true),
@@ -112,19 +135,21 @@ class _LoginPageState extends State<LoginPage> {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 36,
-        fontFamily: 'OpenSans'
+        fontFamily: 'OpenSans',
+        color: Colors.white,
       ),
     );
   }
 
   Widget _icon() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 4),
-        shape: BoxShape.circle),
-      child: Icon(Icons.person, size: 50),
-      //Image.asset('assets/images/dogicon.png'),
-      );
+    return ClipOval(
+      child: Image.asset(
+        'assets/onboarding/logo.png',
+        height: 300,
+        width: 300,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 
   Widget _inputFieldEmail(String hintText, TextEditingController controller, {isPassword = false}) {
@@ -213,14 +238,16 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'I am a member! ',
+            'Not a member? ',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontFamily: 'OpenSans'), 
           ),
           GestureDetector(
-            onTap: widget.showRegisterPage,
+            onTap: widget.showRegisterPage,//(){
+              //Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage()));
+            //},
             child: Text(
               'Register Now',
               style: TextStyle(
@@ -231,13 +258,12 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ],
       ),
-      //Text(isLogin ? 'Register instead' : 'Login instead'),
     );
   }
 
   Widget _extraText() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -254,7 +280,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Text(
               "Forgot Password?",
               style: TextStyle(
-                fontSize: 12, 
+                fontSize: 15, 
                 color: Colors.blue,
                 fontWeight: FontWeight.bold, 
                 fontFamily: 'OpenSans',

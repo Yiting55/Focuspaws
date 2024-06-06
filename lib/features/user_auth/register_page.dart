@@ -1,9 +1,11 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
 //import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:focuspaws/features/onboarding/onboarding_view.dart';
+//import 'package:focuspaws/features/user_auth/login_page.dart';
 import 'package:focuspaws/features/user_auth/user_auth.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -31,23 +33,56 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> signUp() async {
     if (passwordConfirmed()) {
+
+      showDialog(
+      context: context, 
+      builder: (context){
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      });
+
       try {
         await Auth().createUserWithEmailandPassword(
           email: emailController.text, 
           password: passwordController.text,
         );
+        
+        Navigator.pop(context);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => OnboardingView()));
+      
       } on FirebaseAuthException catch (e) {
-        setState(() {
-          errorMessage = e.message;
+        
+        Navigator.pop(context);
+        
+        showDialog(
+        context: context, 
+        builder: (context) {
+          return AlertDialog(
+            content: Text(e.code),
+          );
         });
       }
     }
   }
 
+  //void toggleScreen() {
+    //setState(() {
+      //showLoginPage = !showLoginPage;
+    //});
+  //}
+
   bool passwordConfirmed() {
     if (passwordController.text.trim() == confirmpasswordController.text.trim()) {
       return true;
     } else {
+      showDialog(
+        context: context, 
+        builder: (context) {
+          return AlertDialog(
+            content: Text('Passwords not the same!'),
+          );
+        });
       return false;
     }
   }
@@ -86,17 +121,17 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _header(),
-                const SizedBox(height: 20),
+                //const SizedBox(height: 10),
                 _icon(),
-                const SizedBox(height: 20),
+                //const SizedBox(height: 10),
                 _inputFieldEmail("Enter your Username", emailController),
                 const SizedBox(height: 10),
                 _inputFieldPassword("Enter your Password", passwordController, isPassword: true),
                 const SizedBox(height: 10),
                 _inputFieldConfirmedPassword("Confirm your Password", confirmpasswordController, isPassword: true),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 _submitButton(),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
                 _loginOrRegisterButton(),
               ],
             ),
@@ -110,19 +145,21 @@ class _RegisterPageState extends State<RegisterPage> {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 36,
-        fontFamily: 'OpenSans'
+        fontFamily: 'OpenSans',
+        color: Colors.white
       ),
     );
   }
 
   Widget _icon() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 4),
-        shape: BoxShape.circle),
-      child: Icon(Icons.person, size: 50),
-      //Image.asset('assets/images/dogicon.png'),
-      );
+    return ClipOval(
+      child: Image.asset(
+        'assets/onboarding/logo.png',
+        height: 300,
+        width: 300,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 
   Widget _inputFieldEmail(String hintText, TextEditingController controller, {isPassword = false}) {
@@ -206,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.deepOrange,
+            color: Color.fromARGB(255, 255, 130, 21),
             borderRadius: BorderRadius.circular(16),
           ), 
           child: Text(
@@ -226,19 +263,22 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _loginOrRegisterButton() {
     return TextButton(
-      onPressed: () {}, 
+      onPressed: () {
+      }, 
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Not a member? ',
+            'I am a member! ',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontFamily: 'OpenSans'), 
           ),
           GestureDetector(
-            onTap: widget.showLoginPage,
+            onTap: widget.showLoginPage,//(){
+              //Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
+            //},
             child: Text(
               'Login Now',
               style: TextStyle(

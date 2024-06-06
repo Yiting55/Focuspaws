@@ -18,9 +18,9 @@ class _HomePageState extends State<HomePage> {
     await Auth().signout();
   }
 
-  Widget _title() {
-    return const Text('FocusPaws');
-  }
+  //Widget _title() {
+    //return const Text('FocusPaws');
+  //}
 
   Widget _userId() {
     return Text('signed in as: ${user!.email!}');
@@ -38,7 +38,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _title(),
+        backgroundColor: Colors.orange,
+        //title: _title(),
       ),
       body: Container(
         height: double.infinity,
