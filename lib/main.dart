@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:focuspaws/features/pages/home_page.dart';
+import 'package:focuspaws/features/pages/main_page.dart';
 import 'package:focuspaws/features/user_auth/login_page.dart';
 import 'package:focuspaws/features/user_auth/signinorregister_page.dart';
 import 'package:focuspaws/features/user_auth/user_auth.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 //import 'package:focuspaws/features/app/splash_screen/splash_screen.dart';
 //import 'package:focuspaws/features/login_page.dart';
 import 'package:focuspaws/features/onboarding/onboarding_view.dart';
+import 'package:focuspaws/features/pet/pet.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,7 +49,8 @@ class MyApp extends StatelessWidget {
             //if (onboarding){
               //return OnboardingView();
             //} else {
-            return const HomePage();
+            Pet dog = Pet();
+            return MainPage(dog);
           }
           //} else {
           return const SigninOrRegisterPage();
