@@ -3,6 +3,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:focuspaws/features/pages/home_page.dart';
+import 'package:focuspaws/features/pages/timer_page.dart';
+import 'package:focuspaws/features/pages/calendar_page.dart';
 import 'package:focuspaws/features/user_auth/login_page.dart';
 import 'package:focuspaws/features/user_auth/signinorregister_page.dart';
 import 'package:focuspaws/features/user_auth/user_auth.dart';
@@ -29,8 +31,6 @@ Future<void> main() async{
 class MyApp extends StatelessWidget {
   final bool onboarding;
   const MyApp({super.key, this.onboarding = false});
-
-  // This widget is the root of your application.
   
   @override
   Widget build(BuildContext context) {
@@ -43,16 +43,13 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder<User?>(
         stream: Auth().authStateChanges,
         builder: (context, snapshot) {
-          if(snapshot.hasData) {
-            //if (onboarding){
-              //return OnboardingView();
-            //} else {
-            return const HomePage();
-          }
-          //} else {
-          return const SigninOrRegisterPage();
-          }
-        
+          //if(snapshot.hasData) {
+            //return const HomePage();
+         //}
+          //return const SigninOrRegisterPage();
+          return TimerPage();
+          //return CalendarPage();
+          } 
       ),
     );
   }
