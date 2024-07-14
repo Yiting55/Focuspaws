@@ -5,12 +5,14 @@ class FocusActivity {
   final int duration;
   final bool isSuccess;
   final DateTime timestamp;
+  final String level;
 
   FocusActivity({
     required this.name,
     required this.duration,
     required this.isSuccess,
     required this.timestamp,
+    required this.level,
   });
 
   Map<String, dynamic> toMap() {
@@ -19,6 +21,7 @@ class FocusActivity {
       'duration': duration,
       'isSuccess': isSuccess,
       'timestamp': DateTime(timestamp.year, timestamp.month, timestamp.day),
+      'level': level,
     };
   }
 
@@ -28,6 +31,7 @@ class FocusActivity {
       duration: map['duration'], 
       isSuccess: map['isSuccess'],
       timestamp: (map['timestamp'] as Timestamp).toDate(),
+      level: map['level'],
     );
   }
 }

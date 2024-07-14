@@ -153,11 +153,13 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
     if (currentUser != null) {
       DateTime currentTime = DateTime.now();
       String currentName = _taskName;
+      String currentLevel = widget.level;
       FocusActivity focusActivity = FocusActivity(
         name: currentName, 
         duration: _totalTime, 
         isSuccess: isSuccess,
         timestamp: currentTime,
+        level: currentLevel,
       );
       CollectionReference allFocusActivity = FirebaseFirestore.instance
         .collection('users')

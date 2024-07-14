@@ -1,9 +1,10 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, unused_field
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/pages/focus_activity.dart';
+import 'package:flutter_application_1/features/pages/summary_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -76,33 +77,38 @@ class _CalendarPageState extends State<CalendarPage> {
       _focusedDay = focusedDay;
       _selectedEvents = _getEventsForDay(selectedDay);
     });
-    _showFocusDataDialog();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SummaryPage(date: _selectedDay),
+    ),
+  );
   }
 
-  void _showFocusDataDialog() {
-    showDialog(
-      context: context, 
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Focus Activities'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: _selectedEvents.map((event) => ListTile(
-              title: Text(event.name),
-              subtitle: Text('Duration: ${event.duration} seconds\nStatus: ${event.isSuccess ? 'Success' : 'Failure'}'),
-            )).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              }, 
-              child: Text('OK'),
-            )
-          ]
-        );
-      });
-  }
+  // void _showFocusDataDialog() {
+  //   showDialog(
+  //     context: context, 
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Focus Activities'),
+  //         content: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: _selectedEvents.map((event) => ListTile(
+  //             title: Text(event.name),
+  //             subtitle: Text('Duration: ${event.duration} seconds\nStatus: ${event.isSuccess ? 'Success' : 'Failure'}'),
+  //           )).toList(),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             }, 
+  //             child: Text('OK'),
+  //           )
+  //         ]
+  //       );
+  //     });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -201,28 +207,6 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
     );
   }
-
-  // Widget _buildEventsMarker(DateTime date, List events) {
-  //   if(events.isNotEmpty) {
-  //     return Container(
-  //       decoration: BoxDecoration(
-  //         shape: BoxShape.circle,
-  //         color: Colors.blue,
-  //       ),
-  //       width: 16.0,
-  //       height: 16.0,
-  //       child: Center(
-  //         child: Text(
-  //           '${events.length}',
-  //           style: TextStyle().copyWith(
-  //             color: Colors.white,
-  //             fontSize: 12.0,
-  //           ),
-  //         ),)
-  //     );
-  //   }
-  //   return SizedBox.shrink();
-  // }
 
   Widget _userInfo() {
     return Column(
