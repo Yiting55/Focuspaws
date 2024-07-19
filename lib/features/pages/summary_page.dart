@@ -7,36 +7,47 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class SummaryPage extends StatelessWidget {
-  final DateTime date;
+  final DateTime startDate;
+  final DateTime endDate;
 
-  const SummaryPage({super.key, required this.date});
+  const SummaryPage({super.key, required this.startDate, required this.endDate});
 
   Map<String, Map<String, int>> _getWeeklyData(List<FocusActivity> events) {
     Map<String, Map<String, int>> weeklyData = {
-      '1': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Monday
-      '2': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Tuesday
-      '3': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Wednesday
-      '4': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Thursday
-      '5': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Friday
-      '6': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Saturday
-      '7': {'Level1': 0, 'Level2': 0, 'Level3': 0}, // Sunday
+      '1': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Monday
+      '2': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Tuesday
+      '3': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Wednesday
+      '4': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Thursday
+      '5': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Friday
+      '6': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Saturday
+      '7': {'Level 1': 0, 'Level 2': 0, 'Level 3': 0}, // Sunday
     };
 
     for (var event in events) {
-      String day = event.timestamp.weekday.toString();
-      switch (event.level) {
-        case 'Level1': // Adjusted to match Firestore data
-          weeklyData[day]!['Level1'] = (weeklyData[day]!['Level1'] ?? 0) + 1;
-          break;
-        case 'Level2': // Adjusted to match Firestore data
-          weeklyData[day]!['Level2'] = (weeklyData[day]!['Level2'] ?? 0) + 1;
-          break;
-        case 'Level3': // Adjusted to match Firestore data
-          weeklyData[day]!['Level3'] = (weeklyData[day]!['Level3'] ?? 0) + 1;
-          break;
+      if (event.isSuccess) {
+        String day = event.timestamp.weekday.toString();
+        switch (event.level) {
+          case 'Level 1': 
+            weeklyData[day]!['Level 1'] = (weeklyData[day]!['Level 1'] ?? 0) + event.duration;
+            break;
+          case 'Level 2': 
+            weeklyData[day]!['Level 2'] = (weeklyData[day]!['Level 2'] ?? 0) + event.duration;
+            break;
+          case 'Level 3': 
+            weeklyData[day]!['Level 3'] = (weeklyData[day]!['Level 3'] ?? 0) + event.duration;
+            break;
+        }
       }
     }
     return weeklyData;
+  }
+
+  List<FocusActivity> _filterCurrentWeekActivities(List<FocusActivity> events) {
+    DateTime startOfWeek = startDate;
+    DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+    return events.where((event) {
+      return event.timestamp.isAfter(startOfWeek) && event.timestamp.isBefore(endOfWeek);
+    }).toList();
   }
 
   Future<List<FocusActivity>> _fetchFocusActivities() async {
@@ -57,6 +68,49 @@ class SummaryPage extends StatelessWidget {
     }
   }
 
+  String _getMonthName(int month) {
+    switch (month) {
+      case 1:
+        return 'Jan';
+      case 2:
+        return 'Feb';
+      case 3:
+        return 'Mar';
+      case 4:
+        return 'Apr';
+      case 5:
+        return 'May';
+      case 6:
+        return 'Jun';
+      case 7:
+        return 'Jul';
+      case 8:
+        return 'Aug';
+      case 9:
+        return 'Sep';
+      case 10:
+        return 'Oct';
+      case 11:
+        return 'Nov';
+      case 12:
+        return 'Dec';
+      default:
+        return '';
+    }
+  }
+
+  double _calculateAverageFocusTime(List<FocusActivity> events) {
+    List<FocusActivity> successfulEvents = events.where((event) => event.isSuccess).toList();
+    if (successfulEvents.isEmpty) return 0;
+    double totalFocusTime = successfulEvents.fold(0, (totalTime, event) => totalTime + event.duration);
+
+    // Calculate active days
+    Set<int> activeDays = successfulEvents.map((e) => e.timestamp.weekday).toSet();
+    int activeDaysCount = activeDays.length;
+
+    return activeDaysCount > 0 ? totalFocusTime / activeDaysCount : 0; // Average per active day
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -75,10 +129,19 @@ class SummaryPage extends StatelessWidget {
           stops: [0.1, 0.3, 0.7, 0.9],
         )),
       child: Scaffold(
-        extendBodyBehindAppBar: true,
+        extendBodyBehindAppBar: false,
         appBar: AppBar(
-          title: Text('Focus Summary'),
+          title: Text('Weekly Summary'),
           backgroundColor: Colors.transparent,
+          centerTitle: true,
+          elevation: 0, // Remove elevation
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(20.0),
+            child: Text(
+              '${startDate.day} ${_getMonthName(startDate.month)} - ${endDate.day} ${_getMonthName(endDate.month)}',
+              style: TextStyle(fontSize: 14, color: Colors.black),
+            ),
+          ),
         ),
         backgroundColor: Colors.transparent,
         body: Center(child: _page()),
@@ -97,15 +160,72 @@ class SummaryPage extends StatelessWidget {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(child: Text('No data available'));
         } else {
-          List<FocusActivity> events = snapshot.data!;
+          List<FocusActivity> events = _filterCurrentWeekActivities(snapshot.data!);
+          double averageFocusTime = _calculateAverageFocusTime(events);
+          int totalAttempts = events.length;
+          int successfulTasks = events.where((event) => event.isSuccess).length;
+          int failureTasks = totalAttempts - successfulTasks;
+          
           return SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 10),
-                _stackedBarChart(events),
-                const SizedBox(height: 30),
-                _circularProgressChart(events),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // focus time summary
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 10),
+                        _averageFocusTime(averageFocusTime),
+                        const SizedBox(height: 20),
+                        _stackedBarChart(events),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  //successful task summary
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 10),
+                        _taskNumberSummary(totalAttempts, successfulTasks, failureTasks),
+                        const SizedBox(height: 10),
+                        _circularProgressChart(events),
+                      ],
+                    ),
+                  ), 
+                ],
+              ),
             ),
           );
         }
@@ -113,129 +233,262 @@ class SummaryPage extends StatelessWidget {
     );
   }
 
+  RichText _averageFocusTime(double averageFocusTime) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: 'Average\n',
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Open Sans',
+              color: Colors.black),
+          ),
+          TextSpan(
+            text: '${averageFocusTime.toStringAsFixed(2)} hours',
+            style: TextStyle(
+              fontSize: 24, 
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Open Sans',
+              color: Colors.black),
+          ),
+        ]
+      ),
+    );
+  }
+
   Widget _stackedBarChart(List<FocusActivity> events) {
+
     Map<String, Map<String, int>> weeklyData = _getWeeklyData(events);
     List<BarChartGroupData> barGroups = [];
 
-    weeklyData.forEach((day, data) {
+    double maxHours = 0.0;
+    List<String> orderedDays = ['7', '1', '2', '3', '4', '5', '6'];
+
+    for (var day in orderedDays) {
+      double level1Hours = weeklyData[day]!['Level 1']!.toDouble();
+      double level2Hours = weeklyData[day]!['Level 2']!.toDouble();
+      double level3Hours = weeklyData[day]!['Level 3']!.toDouble();
+      double totalFocusHours = level1Hours + level2Hours + level3Hours;
+      // double remainingHours = maxHours - totalFocusHours;
+      if (totalFocusHours > maxHours) {
+        maxHours = totalFocusHours;
+      }
+      maxHours = ((maxHours / 2).ceil()) * 2;      
+
       barGroups.add(BarChartGroupData(
         x: int.parse(day),
         barRods: [
           BarChartRodData(
-            toY: data['Level1']!.toDouble(),
-            color: Colors.red,
+            borderRadius: BorderRadius.circular(16),
+            toY: maxHours,
+            color: const Color.fromARGB(96, 186, 186, 186),
             width: 16,
-          ),
-          BarChartRodData(
-            toY: data['Level2']!.toDouble(),
-            color: Colors.green,
-            width: 16,
-          ),
-          BarChartRodData(
-            toY: data['Level3']!.toDouble(),
-            color: Colors.blue,
-            width: 16,
-          ),
-        ],
+            rodStackItems: [
+              BarChartRodStackItem(0, level3Hours, Color.fromARGB(255, 18, 68, 109)),
+              BarChartRodStackItem(level3Hours, level3Hours + level2Hours, Color.fromARGB(255, 22, 103, 169)),
+              BarChartRodStackItem(level3Hours + level2Hours, totalFocusHours, Colors.lightBlue),
+              // BarChartRodStackItem(totalFocusHours, maxHours, Colors.white),
+            ],
+        ),],
       ));
-    });
+    }
     
-    
-    return SizedBox(
-      height: 300,
-      child: BarChart(
-        BarChartData(
-          barGroups: barGroups,
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true),
-            ),
-               
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  switch (value.toInt()) {
-                    case 1:
-                      return Text('Mon');
-                    case 2:
-                      return Text('Tue');
-                    case 3:
-                      return Text('Wed');
-                    case 4:
-                      return Text('Thu');
-                    case 5:
-                      return Text('Fri');
-                    case 6:
-                      return Text('Sat');
-                    case 7:
-                      return Text('Sun');
-                    default:
-                      return Text('');
-                  }
-                },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 300,
+          child: BarChart(
+            BarChartData(
+              maxY: maxHours,
+              minY: 0,
+              
+              barGroups: barGroups,
+              titlesData: FlTitlesData(
+                // dont show leftTitles and topTitles
+                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false),),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true, 
+                    reservedSize: 28,
+                    interval: 2,
+                    getTitlesWidget: (value, meta) {
+                      if (value.toInt() % 2 == 0) {
+                        return Text('${value.toInt()}s');
+                      } else {
+                        return Text('');
+                      }
+                    },
+                  ),
+                ),
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false),),
+                   
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      switch (value.toInt()) {
+                        case 7:
+                          return Text('S');
+                        case 1:
+                          return Text('M');
+                        case 2:
+                          return Text('T');
+                        case 3:
+                          return Text('W');
+                        case 4:
+                          return Text('T');
+                        case 5:
+                          return Text('F');
+                        case 6:
+                          return Text('S');
+                        default:
+                          return Text('');
+                      }
+                    },
+                  ),
+                ),
+              ),
+              gridData: FlGridData(show: false), 
+              borderData: FlBorderData(show: false),
+              barTouchData: BarTouchData(
+                touchTooltipData: BarTouchTooltipData(
+                  // tooltipBgColor: Colors.grey,
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    String day = orderedDays[group.x.toInt()];
+                    double level1Hours = weeklyData[day]!['Level 1']!.toDouble();
+                    double level2Hours = weeklyData[day]!['Level 2']!.toDouble();
+                    double level3Hours = weeklyData[day]!['Level 3']!.toDouble();
+                    return BarTooltipItem(
+                      'Level 1: ${level1Hours.toStringAsFixed(2)} hrs\n'
+                      'Level 2: ${level2Hours.toStringAsFixed(2)} hrs\n'
+                      'Level 3: ${level3Hours.toStringAsFixed(2)} hrs',
+                      TextStyle(color: Colors.white),
+                    );
+                  },
+                ),
               ),
             ),
           ),
         ),
-      ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _legendItem(Colors.lightBlue, 'Level 1'),
+            const SizedBox(width: 20),
+            _legendItem(Color.fromARGB(255, 22, 103, 169), 'Level 2'),
+            const SizedBox(width: 20),
+            _legendItem(Color.fromARGB(255, 18, 68, 109), 'Level 3'),
+          ],
+        )
+      ],
     );     
+  }
+  
+  Widget _legendItem(Color color, String text) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          color: color,
+        ),
+        const SizedBox(width: 4),
+        Text(text, style: TextStyle(fontSize: 14)),
+      ],
+    );
   }
 
   Widget _circularProgressChart(List<FocusActivity> events) {
     int successCount = events.where((event) => event.isSuccess).length;
-    int failureCount = events.length - successCount;
-    double successPercentage = (successCount / events.length) * 100;
+    int totalCount = events.length;
 
-    return Column(
-      children: [
-        Text(
-          'Success Rate',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Open Sans',
-          ),
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: 200,
-          child: Stack(
-            children: [
-              Center(
-                child: Text(
-                  '${successPercentage.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Open Sans',
-                  ),
-                ),
+    return SizedBox(
+      height: 250,
+      child: Center(
+        child: Stack(
+          children: <Widget>[
+            SizedBox(
+              height: 200.0,
+              width: 200.0,
+              child: CircularProgressIndicator(
+                strokeWidth: 12, // Adjust thickness of the circle
+                value: totalCount != 0 ? successCount / totalCount : 0,
+                backgroundColor: Colors.grey.withOpacity(0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
               ),
-              PieChart(
-                PieChartData(
-                  sections: [
-                    PieChartSectionData(
-                      value: successCount.toDouble(),
-                      color: Colors.green,
-                      title: 'Success',
-                      radius: 50,
+            ),
+            Positioned.fill(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Success',
+                      style: TextStyle(fontSize: 18.0),
                     ),
-                    PieChartSectionData(
-                      value: failureCount.toDouble(),
-                      color: Colors.red,
-                      title: 'Failure',
-                      radius: 50,
+                    Text(
+                      '${(successCount / totalCount * 100).toStringAsFixed(1)}%',
+                      style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _taskNumberSummary(int totalAttempts, int successfulTasks, int failureTasks) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Total\n',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'Open Sans',
+                  color: Colors.black),
+              ),
+              TextSpan(
+                text: '${totalAttempts.toString()} tasks',
+                style: TextStyle(
+                  fontSize: 24, 
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Open Sans',
+                  color: Colors.black),
+              ),
+            ]
           ),
+        ),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _summaryTextItem('Successful', successfulTasks.toString()),
+            SizedBox(width: 150),
+            _summaryTextItem('Failed', failureTasks.toString()),
+          ],
         ),
       ],
     );
   }
+
+  Widget _summaryTextItem(String label, String value) {
+  return Column(
+    children: [
+      Text(label, style: TextStyle(fontSize: 15)),
+      SizedBox(height: 5),
+      Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
 }
 

@@ -55,9 +55,12 @@ class _RegisterPageState extends State<RegisterPage> {
           });
         }
         
-        Navigator.pop(context);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => OnboardingView()));
-      
+        if (mounted) {
+          Navigator.pop(context);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => OnboardingView()),
+          );
+        }
       } on FirebaseAuthException catch (e) {
         
         Navigator.pop(context);

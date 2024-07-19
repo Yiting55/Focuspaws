@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, unused_field, avoid_types_as_parameter_names
+// ignore_for_file: prefer_const_constructors, unused_field, avoid_types_as_parameter_names, unused_local_variable
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,10 +40,16 @@ class _BagPageState extends State<BagPage> {
       'Level 3': [],
     };
 
+    DateTime today = DateTime.now();
+
     for (var doc in querySnapshot.docs) {
       String level = doc['level'];
       int quantity = doc['quantity'];
       DateTime expiryDate = (doc['expiryDate'] as Timestamp).toDate();
+      
+      if (expiryDate.isBefore(today)) {
+        continue;
+      }
 
       if (foodLevels.containsKey(level)) {
         foodLevels[level]?.add(FoodItem(
@@ -106,19 +112,21 @@ class _BagPageState extends State<BagPage> {
         }
 
         var foodLevels = snapshot.data!;
-        // var level1Items = foodItems.where((item) => item.level == 'Level 1').toList();
-        // var level2Items = foodItems.where((item) => item.level == 'Level 2').toList();
-        // var level3Items = foodItems.where((item) => item.level == 'Level 3').toList();
-
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _levelBox(context, foodLevels['Level 1'] ?? [], 'Level 1', 'assets/onboarding/level1food.png'),
-            SizedBox(height: 15.0),
-            _levelBox(context, foodLevels['Level 2'] ?? [], 'Level 2', 'assets/onboarding/level2food.png'),
-            SizedBox(height: 15.0),
-            _levelBox(context, foodLevels['Level 3'] ?? [], 'Level 3', 'assets/onboarding/level3food.png'),
-          ],
+        
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _levelBox(context, foodLevels['Level 1'] ?? [], 'Level 1', 'assets/onboarding/level1food.png'),
+                SizedBox(height: 15.0),
+                _levelBox(context, foodLevels['Level 2'] ?? [], 'Level 2', 'assets/onboarding/level2food.png'),
+                SizedBox(height: 15.0),
+                _levelBox(context, foodLevels['Level 3'] ?? [], 'Level 3', 'assets/onboarding/level3food.png'),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -145,11 +153,18 @@ class _BagPageState extends State<BagPage> {
   Widget _levelBox(BuildContext context, List<FoodItem> foodItems, String level, String imagePath) {
     int totalQuantity = foodItems.fold(0, (sum, item) => sum + item.quantity);
     String expiryDate = '--';
+    bool isExpiringToday = false;
+    DateTime today = DateTime.now();
+    DateTime endOfToday = DateTime(today.year, today.month, today.day, 23, 59, 59);
+
     if (foodItems.isNotEmpty) {
       DateTime mostRecentExpiryDate = foodItems
           .map((item) => item.expiryDate)
           .reduce((a, b) => a.isAfter(b) ? a : b);
       expiryDate = mostRecentExpiryDate.toLocal().toString().split(' ')[0];
+      if (mostRecentExpiryDate.isAfter(today) && mostRecentExpiryDate.isBefore(endOfToday)) {
+        isExpiringToday = true;
+      }
     }
 
     return Center(

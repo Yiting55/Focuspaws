@@ -1,9 +1,8 @@
-// ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously, unused_local_variable
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/pages/main_page.dart';
-import 'package:flutter_application_1/features/pet/pet.dart';
+import 'package:flutter_application_1/features/pages/petshop_page.dart';
 import 'package:flutter_application_1/features/user_auth/forgotpassword_page.dart';
 //import 'package:focuspaws/features/user_auth/register_page.dart';
 //import 'package:flutter/widgets.dart';
@@ -39,16 +38,23 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text.trim(), 
         password: passwordController.text.trim(),
       );
-      
-      Navigator.pop(context);
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(
-          builder: (context) {
-            Pet dog = Pet();
-            return MainPage(dog);
-          }),
+      UserCredential userCredential = await Auth().signInWithEmailandPassword(
+        email: emailController.text.trim(), 
+        password: passwordController.text.trim(),
       );
+      User user = userCredential.user!;
+
+      if (mounted) {
+        Navigator.pop(context);
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(
+            builder: (context) {
+              return Petshop(user);
+            }),
+        );
+      }
+      
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
       
@@ -192,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
       borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: Colors.white)
     );    
-    return  TextField(
+    return TextField(
       style: const TextStyle(color: Colors.white),
       controller: passwordController,
       decoration: InputDecoration(

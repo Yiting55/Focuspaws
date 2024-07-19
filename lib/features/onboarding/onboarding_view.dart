@@ -1,10 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
+import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:flutter_application_1/features/onboarding/onboarding_items.dart";
+import "package:flutter_application_1/features/pages/petshop_page.dart";
 // import "package:flutter_application_1/features/pages/home_page.dart";
-import "package:flutter_application_1/features/pages/main_page.dart";
-import "package:flutter_application_1/features/pet/pet.dart";
+import "package:flutter_application_1/features/user_auth/login_page.dart";
 import "package:smooth_page_indicator/smooth_page_indicator.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -141,14 +142,26 @@ class _OnboardingViewState extends State<OnboardingView> {
           setOnboardingStatus();
 
           //if(!mounted)return;
-          Navigator.pushReplacement(
-            context, 
-            MaterialPageRoute(builder: (context){
-              Pet dog = Pet();
-              return MainPage(dog);
-            }));
+          User? user = FirebaseAuth.instance.currentUser;
+          if (user != null) {
+            Navigator.pushReplacement(
+              context, 
+              MaterialPageRoute(
+                builder: (context) => Petshop(user),
+              ),
+            );
+          } else {
+            // Handle case where user is not logged in
+            Navigator.pushReplacement(
+              context, 
+              MaterialPageRoute(
+                builder: (context) => LoginPage(showRegisterPage: () {}), // Provide appropriate callback
+              ),
+            );
+          }
           
         },
+        
         child: const Text(
           "Get Started", 
           style: TextStyle(

@@ -77,12 +77,16 @@ class _CalendarPageState extends State<CalendarPage> {
       _focusedDay = focusedDay;
       _selectedEvents = _getEventsForDay(selectedDay);
     });
+    DateTime startOfWeek = selectedDay.subtract(Duration(days: selectedDay.weekday % 7));
+    DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SummaryPage(date: _selectedDay),
-    ),
-  );
+        builder: (context) => SummaryPage(
+          startDate: startOfWeek,
+          endDate: endOfWeek,),
+      ),
+    );
   }
 
   // void _showFocusDataDialog() {

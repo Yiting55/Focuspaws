@@ -16,9 +16,22 @@ class FoodPage extends StatefulWidget {
 }
 
 class _FoodPageState extends State<FoodPage> {
+  late List<FoodItem> freshFoodItems;
+
+  @override 
+  void initState() {
+    super.initState();
+    freshFoodItems = _filterFreshFoodItems(widget.foodItems);
+  }
+
+  List<FoodItem> _filterFreshFoodItems(List<FoodItem> foodItems) {
+    DateTime today = DateTime.now();
+    DateTime endOfToday = DateTime(today.year, today.month, today.day, 23, 59, 59);
+    return foodItems.where((item) => item.expiryDate.isAfter(today) || item.expiryDate.isAtSameMomentAs(endOfToday)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    
     return Container(
       height: double.infinity,
       width: double.infinity,
@@ -54,7 +67,7 @@ class _FoodPageState extends State<FoodPage> {
   }
 
   Widget _foodList() {
-    if (widget.foodItems.isEmpty) {
+    if (freshFoodItems.isEmpty) {
       return Center(
         child: Text(
           'No food available in ${widget.level}.',
@@ -70,11 +83,21 @@ class _FoodPageState extends State<FoodPage> {
       itemCount: widget.foodItems.length,
       itemBuilder: (context, index) {
         var foodItem = widget.foodItems[index];
+        bool isExpiringToday = foodItem.expiryDate.isAtSameMomentAs(DateTime.now());
         return ListTile(
           leading: Image.asset('assets/onboarding/level${widget.level.split(' ')[1]}food.png'),
-          title: Text(foodItem.level),
+          title: Text(
+            foodItem.level,
+            style: TextStyle(
+              color: isExpiringToday ? Colors.red : Colors.black,
+              fontWeight: isExpiringToday ? FontWeight.bold : FontWeight.normal,
+            ),
+            ),
           subtitle: Text(
             'Quantity: ${foodItem.quantity}\nExpires on: ${foodItem.expiryDate.toLocal().toString().split(' ')[0]}',
+            style: TextStyle(
+              color: isExpiringToday ? Colors.red : Colors.black,
+            ),
           ),
         );
       },
