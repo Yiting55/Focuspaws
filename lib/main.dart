@@ -2,8 +2,10 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/features/pages/home_page.dart';
 import 'package:flutter_application_1/features/pages/main_page.dart';
+import 'package:flutter_application_1/features/pages/petshop.dart';
 import 'package:flutter_application_1/features/pages/timer_page.dart';
 import 'package:flutter_application_1/features/pages/calendar_page.dart';
 import 'package:flutter_application_1/features/pet/pet.dart';
@@ -46,13 +48,61 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder<User?>(
         stream: Auth().authStateChanges,
         builder: (context, snapshot) {
-          if(snapshot.hasData) {
-            Pet dog = Pet();
-            return MainPage(dog);
+          if (snapshot.hasData) {
+            User user = snapshot.data!;
+            return FutureBuilder<Pet?>(
+              future: loadPetData(user),
+              builder: (context, petSnapshot) {
+                if (petSnapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
+                if (petSnapshot.hasData) {
+                  Pet dog = petSnapshot.data!;
+                  return MainPage(dog, user);
+                } else {
+                  return Petshop(user);
+                }
+              },
+            );
           }
           return const SigninOrRegisterPage();
-        } 
+        }
       ),
     );
   }
 }     
+
+Future<void> savePetData(User user, Pet pet) async {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  await firestore.collection('pets').doc(user.uid).set({
+    'type': pet.runtimeType.toString(),
+    // Add any other necessary pet data here
+  });
+}
+
+Future<Pet?> loadPetData(User user) async {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  DocumentSnapshot snapshot = await firestore.collection('pets').doc(user.uid).get();
+
+  if (snapshot.exists) {
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    String type = data['type'];
+
+    if (type == 'Corgi') {
+      return Corgi();
+    }
+    if (type == 'Samoyed') {
+      return Samoyed();
+    }
+    if (type == 'GoldenRetriever') {
+      return GoldenRetriever();
+    }
+    // Handle other pet types as necessary
+  }
+  return null;
+}
+
+void updatePet(User user, Pet newPet) {
+  savePetData(user, newPet);
+  // Call setState in the appropriate widget to update the UI
+}

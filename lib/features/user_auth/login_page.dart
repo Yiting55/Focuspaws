@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/pages/main_page.dart';
+import 'package:flutter_application_1/features/pages/petshop.dart';
 import 'package:flutter_application_1/features/pet/pet.dart';
 import 'package:flutter_application_1/features/user_auth/forgotpassword_page.dart';
 //import 'package:focuspaws/features/user_auth/register_page.dart';
@@ -39,14 +40,17 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text.trim(), 
         password: passwordController.text.trim(),
       );
-      
+      UserCredential userCredential = await Auth().signInWithEmailandPassword(
+      email: emailController.text.trim(), 
+      password: passwordController.text.trim(),
+      );
+    User user = userCredential.user!;
       Navigator.pop(context);
       Navigator.pushReplacement(
         context, 
         MaterialPageRoute(
           builder: (context) {
-            Pet dog = Pet();
-            return MainPage(dog);
+            return Petshop(user);
           }),
       );
     } on FirebaseAuthException catch (e) {
