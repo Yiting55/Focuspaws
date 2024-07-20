@@ -35,37 +35,13 @@ Future<void> main() async{
   runApp(MyApp(onboarding: onboarding));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   final bool onboarding;
   const MyApp({super.key, this.onboarding = false});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  Locale _locale = Locale('en');
-
-  void setLocale(Locale locale) {
-    setState(() {
-      _locale = locale;
-    });
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // language default
-      locale: _locale,
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: [
-        Locale('en', ''),
-        Locale('zh', ''),
-      ],
       
       debugShowCheckedModeBanner: false,
       title: "FocusPaws",
@@ -75,61 +51,13 @@ class _MyAppState extends State<MyApp> {
       home: StreamBuilder<User?>(
         stream: Auth().authStateChanges,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            User user = snapshot.data!;
-            return FutureBuilder<Pet?>(
-              future: loadPetData(user),
-              builder: (context, petSnapshot) {
-                if (petSnapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                }
-                if (petSnapshot.hasData) {
-                  Pet dog = petSnapshot.data!;
-                  return MainPage(dog, user);
-                } else {
-                  return Petshop(user);
-                }
-              },
-            );
+          if(snapshot.hasData) {
+            Pet dog = Pet();
+            return MainPage(dog);
           }
           return const SigninOrRegisterPage();
-        }
+        } 
       ),
     );
   }
 }     
-
-Future<void> savePetData(User user, Pet pet) async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  await firestore.collection('pets').doc(user.uid).set({
-    'type': pet.runtimeType.toString(),
-    // Add any other necessary pet data here
-  });
-}
-
-Future<Pet?> loadPetData(User user) async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  DocumentSnapshot snapshot = await firestore.collection('pets').doc(user.uid).get();
-
-  if (snapshot.exists) {
-    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-    String type = data['type'];
-
-    if (type == 'Corgi') {
-      return Corgi();
-    }
-    if (type == 'Samoyed') {
-      return Samoyed();
-    }
-    if (type == 'GoldenRetriever') {
-      return GoldenRetriever();
-    }
-    // Handle other pet types as necessary
-  }
-  return null;
-}
-
-void updatePet(User user, Pet newPet) {
-  savePetData(user, newPet);
-  // Call setState in the appropriate widget to update the UI
-}
