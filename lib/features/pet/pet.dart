@@ -16,59 +16,31 @@ class Pet {
   DateTime? dateRaised;
   String name;
 
-  Pet() 
-    : health = 80,
-      growth = 0,
+  Pet(String name, int health, int growth) 
+    : health = health,
+      growth = growth,
       asleep = false,
       alive = true,
-      name = 'pet',
+      this.name = name,
       image1 = 'assets/onboarding/puppy_kitty.jpeg',
       image2 = 'assets/onboarding/puppy_kitty.jpeg',
       image3 = 'assets/onboarding/puppy_kitty.jpeg',
       dead = 'assets/onboarding/dead.png';
 
-  static Pet fromMap(Map<String, dynamic> map){
-    return Pet();
+   Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'health': health,
+      'growth': growth,
+    };
   }
 
-}
-
-class GoldenRetriever extends Pet {
-  GoldenRetriever() {
-    image1 = 'assets/onboarding/golden1.png';
-    image2 = 'assets/onboarding/golden2.png';
-    image3 = 'assets/onboarding/golden3.png';
-    name = "GoldenRetriever";
+  factory Pet.fromMap(Map<String, dynamic> map) {
+    return Pet(
+      map['name'],
+      map['health'],
+      map['growth'],
+    );
   }
 
-  static GoldenRetriever fromMap(Map<String, dynamic> map){
-    return GoldenRetriever();
-  }
-
-}
-
-class Corgi extends Pet {
-  Corgi() {
-    image1 = 'assets/onboarding/Corgi1.png';
-    image2 = 'assets/onboarding/Corgi2.png';
-    image3 = 'assets/onboarding/Corgi3.png';
-    name = 'Corgi';
-  }
-
-  static Corgi fromMap(Map<String, dynamic> map){
-    return Corgi();
-  }
-}
-
-class Samoyed extends Pet {
-  Samoyed() {
-    image1 = 'assets/onboarding/samo1.png';
-    image2 = 'assets/onboarding/samo2.png';
-    image3 = 'assets/onboarding/samo3.png';
-    name = 'Samoyed';
-  }
-
-  static Samoyed fromMap(Map<String, dynamic> map){
-    return Samoyed();
-  }
 }

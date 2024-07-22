@@ -8,6 +8,7 @@ import 'package:flutter_application_1/features/pages/calendar_page.dart';
 import 'package:flutter_application_1/features/pages/hunt_page.dart';
 import 'package:flutter_application_1/features/pages/petshop.dart';
 import 'package:flutter_application_1/features/pages/timer_page.dart';
+import 'package:flutter_application_1/features/pet/achievement.dart';
 import 'package:flutter_application_1/features/pet/pet.dart';
 import 'package:flutter_application_1/features/pages/healthBar.dart';
 import 'package:flutter_application_1/features/alert/alert.dart';
@@ -15,25 +16,40 @@ import 'package:flutter_application_1/features/user_auth/login_page.dart';
 import 'package:flutter_application_1/features/user_auth/signinorregister_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_1/features/pages/petshop.dart';
-import 'package:flutter_application_1/features/pages/achievement.dart';
+import 'package:flutter_application_1/features/pages/achievementbook.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/features/pet/achievement.dart';
 
 class MainPage extends StatefulWidget {
   Pet pet; 
   User user;
+  List<Achievement> achievements;
+  bool sleep;
+  bool foster;
+  DateTime sleepTime;
+  DateTime cookTime;
+  DateTime fosterTime;
 
-  MainPage(Pet dog, User user, {super.key})
+  MainPage(Pet dog, User user, List<Achievement> achievements, bool sleep, bool foster, 
+  DateTime sleepTime, DateTime cookTime, DateTime fosterTime, {super.key})
     : pet = dog,
-    this.user = user;
+    user = user,
+    achievements = achievements,
+    sleep = sleep,
+    foster = foster,
+    sleepTime = sleepTime,
+    cookTime = cookTime,
+    fosterTime = fosterTime;
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  late double healthValue; // Progress value based on pet's health
+  late int healthValue; // Progress value based on pet's health
   late Timer? _timer; // Timer for updating progress
-  late double growthValue;
+  late int growthValue;
   late DateTime _lastCookTime = DateTime.now().subtract(const Duration(hours: 7));
   late String image;
   late bool sleep;
@@ -41,25 +57,67 @@ class _MainPageState extends State<MainPage> {
   DateTime _lastSleepTime = DateTime.now().subtract(const Duration(hours: 12));
   DateTime _lastFosterTime = DateTime.now().subtract(const Duration(days: 8));
   late bool die;
+  late List<Achievement> achievements;
 
   @override
   void initState() {
     super.initState();
     // Initialize progress value with pet's initial health
-    healthValue = widget.pet.health / 100 * 100;
-    growthValue = widget.pet.growth / 100 * 100;
-    sleep = false;
-    foster = false;
+    healthValue = widget.pet.health ;
+    growthValue = widget.pet.growth ;
+    _timer = null;
+    sleep = widget.sleep;
+    foster = widget.foster;
+    _lastCookTime = widget.cookTime;
+    _lastFosterTime = widget.fosterTime;
+    _lastSleepTime = widget.sleepTime;
     die = false;
-    startTimer();
+    achievements = widget.achievements;
+    if (sleep == false && foster == false && healthValue > 0) {
+      startTimer();
     }
+  }
+
+  Future<void> savePetAndAchievements(
+    User user,
+    Pet pet,
+    List<Achievement> achievements,
+    bool sleep,
+    bool foster,
+    DateTime sleepTime,
+    DateTime cookTime,
+    DateTime fosterTime
+    ) async {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+  try {
+    print('Saving data for user ID: ${user.uid}');
+    
+    await firestore.collection('users').doc(user.uid).set({
+      'pet': pet.toMap(), // Ensure Pet class has a toMap method to convert it to a Map
+      'achievements': achievements.map((a) => a.toMap()).toList(), // Ensure Achievement class has a toMap method
+      'sleep': sleep,
+      'foster': foster,
+      'sleepTime': Timestamp.fromDate(sleepTime), // Convert DateTime to Timestamp
+      'cookTime': Timestamp.fromDate(cookTime),   // Convert DateTime to Timestamp
+      'fosterTime': Timestamp.fromDate(fosterTime) // Convert DateTime to Timestamp
+      }, SetOptions(merge: true)); // Use SetOptions to merge with existing data
+      print('Pet and achievements saved successfully');
+    } catch (e) {
+      print('Failed to save pet and achievements: $e');
+    }
+  } 
 
 
-    void startTimer(){
+
+
+  void startTimer(){
     _timer = Timer.periodic(const Duration(hours: 1), (Timer timer) {
       setState(() {
         if (healthValue > 0) {
           healthValue-= 2; 
+          Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+          savePetAndAchievements(widget.user, pet, this.achievements, this.sleep, this.foster,
+          _lastSleepTime,_lastCookTime,_lastFosterTime );
           if (healthValue <= 40) {
             sendNotification();
           }
@@ -106,6 +164,9 @@ class _MainPageState extends State<MainPage> {
       } else {
         _timer?.cancel();
       }
+      Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+      savePetAndAchievements(widget.user, pet, this.achievements, this.sleep, this.foster, 
+      _lastSleepTime,_lastCookTime,_lastFosterTime);
     });
   }
 
@@ -123,9 +184,12 @@ class _MainPageState extends State<MainPage> {
       } else {
         _timer?.cancel();
         healthValue = 80;
+        sleep = false;
       }
+      Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+      savePetAndAchievements(widget.user, pet, this.achievements, this.sleep, this.foster, 
+      _lastSleepTime,_lastCookTime,_lastFosterTime);
     });
-
   }
 
   void back() {
@@ -168,7 +232,7 @@ class _MainPageState extends State<MainPage> {
   bool canfoster() {
     DateTime now = DateTime.now();
     Duration difference = now.difference(_lastFosterTime);
-    return difference.inHours >= 12;
+    return difference.inDays >= 7;
   }
 
   void dailyGrow() {
@@ -198,7 +262,10 @@ class _MainPageState extends State<MainPage> {
     } else {
     healthValue += 5;
     }
-    });
+    Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+    savePetAndAchievements(widget.user, pet, this.achievements, sleep, foster, 
+    _lastSleepTime,_lastCookTime,_lastFosterTime);}
+    );
   }
 
   void feed2() {
@@ -208,6 +275,9 @@ class _MainPageState extends State<MainPage> {
     } else {
       healthValue += 10;
     }
+     Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+    savePetAndAchievements(widget.user, pet, this.achievements, sleep, foster, 
+    _lastSleepTime,_lastCookTime,_lastFosterTime);
     });
   }
 
@@ -219,47 +289,49 @@ class _MainPageState extends State<MainPage> {
     healthValue += 20;
     }
     grow();
+    Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+    savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
+    _lastSleepTime,_lastCookTime,_lastFosterTime);
     });
+    
   }
 
   void grow() {
     setState(() {
       if (growthValue >= 149) {
         growthValue = 150;
+      } else {
+        growthValue += 50;
       }
-      growthValue += 50;
+      Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+      savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
+      _lastSleepTime,_lastCookTime,_lastFosterTime);
       if (growthValue == 150) {
-            _checkAndAddPet();
+          if (!exist(widget.pet)) {
+            this.achievements.add(Achievement(petName: widget.pet.name));
+          }
+          Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+          savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
+          _lastSleepTime,_lastCookTime,_lastFosterTime);
       }
     });
   }
 
-  Future<bool> _doesPetExist(User user, String petType) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    QuerySnapshot querySnapshot = await firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('achievement_book')
-        .where('type', isEqualTo: petType)
-        .get();
-
-    return querySnapshot.docs.isNotEmpty;
-  }
-
-  Future<void> _checkAndAddPet() async {
-    bool petExists = await _doesPetExist(widget.user, widget.pet.runtimeType.toString());
-    if (!petExists) {
-      addPetToAchievementBook(widget.user, widget.pet);
+bool exist(Pet pet){
+  for (Achievement achi in achievements) {
+    if (achi.petName == pet.name) {
+      return true;
     }
   }
-
-  Future<void> addPetToAchievementBook(User user, Pet pet) async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  Map<String, dynamic> info = {'type': pet.name,
-      'dateRaised': DateTime.now().toIso8601String()};
-  await firestore.collection('users').doc(user.uid).collection('achievement_book').add(info);
+  return false;
 }
 
+void addAchievement(String petName) async {
+    Achievement newAchievement = Achievement(petName: petName);
+    setState(() {
+      achievements.add(newAchievement);
+    });
+  }
 // Function to load achievement book
 
   Future<void> _logout(BuildContext context) async {
@@ -280,11 +352,29 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     String image;
     if (growthValue < 50 && growthValue >= 0)  {
-      image = widget.pet.image1;
+      if (widget.pet.name == "Corgi") {
+        image = 'assets/onboarding/Corgi1.png';
+      } else if (widget.pet.name == "Golden Retriever") {
+        image = 'assets/onboarding/golden1.png';
+      } else {
+        image = 'assets/onboarding/samo1.png';
+      }
     } else if (growthValue >= 50 && growthValue < 100) {
-      image = widget.pet.image2;
+      if (widget.pet.name == "Corgi") {
+        image = 'assets/onboarding/Corgi2.png';
+      } else if (widget.pet.name == "Golden Retriever") {
+        image = 'assets/onboarding/golden2.png';
+      } else {
+        image = 'assets/onboarding/samo2.png';
+      }
     } else {
-      image = widget.pet.image3;
+      if (widget.pet.name == "Corgi") {
+        image = 'assets/onboarding/Corgi3.png';
+      } else if (widget.pet.name == "Golden Retriever") {
+        image = 'assets/onboarding/golden3.png';
+      } else {
+        image = 'assets/onboarding/samo3.png';
+      }
     } 
     if (healthValue == 0) {
       image = widget.pet.dead;
@@ -347,28 +437,12 @@ class _MainPageState extends State<MainPage> {
 
         // logout button
         Positioned(
-          top: size.height * 0.1,
+          top: size.height * 0.18,
           right: size.width * 0.03,
           child: _logOutButton()
         ),
 
-        Positioned(
-          top: size.height * 0.15, // Adjust position from bottom
-          right: size.width * 0.01, // Adjust position from right
-          child: IconButton(
-            icon: Image.asset(
-              'assets/onboarding/functions/light.png', // Replace with your own image path
-              width: 50.0, // Adjust size as needed
-              height: 50.0,
-              fit: BoxFit.fill,
-            ),
-            onPressed: () {
-              // Handle button 2 press
-            },
-            iconSize: 300,
-          ),
-        ),
-
+       
         Positioned(
           top: size.height * 0.23, // Adjust position from bottom
           right: size.width * 0.01, // Adjust position from right
@@ -409,7 +483,7 @@ class _MainPageState extends State<MainPage> {
                     context: context,
                     builder: (BuildContext context) => AlertDialog(
                       title: Text('Cannot Foster Yet'),
-                      content: Text('Can foster again in ${(7 - (DateTime.now().difference(_lastCookTime).inDays))} days.'),
+                      content: Text('Can foster again in ${(7 - (DateTime.now().difference(_lastFosterTime).inDays))} days.'),
                       actions: <Widget>[
                         TextButton(
                           child: Text('OK'),
@@ -421,6 +495,9 @@ class _MainPageState extends State<MainPage> {
                     ),
                 );
               }
+              Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+              savePetAndAchievements(widget.user, pet, this.achievements, this.sleep, this.foster, 
+              _lastSleepTime,_lastCookTime,_lastFosterTime);
             },
             iconSize: 300,
           ),
@@ -482,7 +559,7 @@ class _MainPageState extends State<MainPage> {
                     context: context,
                     builder: (BuildContext context) => AlertDialog(
                       title: Text('Cannot Sleep Yet'),
-                      content: Text('Can sleep again in ${(12 - (DateTime.now().difference(_lastCookTime).inHours))} hours.'),
+                      content: Text('Can sleep again in ${(12 - (DateTime.now().difference(_lastSleepTime).inHours))} hours.'),
                       actions: <Widget>[
                         TextButton(
                           child: Text('OK'),
@@ -494,6 +571,9 @@ class _MainPageState extends State<MainPage> {
                     ),
                 );
               }
+              Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+              savePetAndAchievements(widget.user, pet, this.achievements, this.sleep, this.foster, 
+              _lastSleepTime,_lastCookTime,_lastFosterTime);
             },
             iconSize: 300,
           ),
@@ -533,7 +613,7 @@ class _MainPageState extends State<MainPage> {
             onPressed: () {
                Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AchievementBookPage(user: widget.user)),
+                MaterialPageRoute(builder: (context) => AchievementBookPage(user: widget.user, achievements: this.achievements)),
               );
             },
             iconSize: 300,
@@ -584,7 +664,7 @@ class _MainPageState extends State<MainPage> {
                                     TextButton(
                                       child: Text('OK'),
                                       onPressed: () {
-                                        Petshop(widget.user);
+                                        Petshop(widget.user, this.achievements);
                                       },
                                     ),
                                   ],
@@ -652,13 +732,48 @@ class _MainPageState extends State<MainPage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              if (canCook()) {
+                              if (sleep == true) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                  title: Text('Cannot Feed'),
+                                  content: Text('Your customer is sleeping'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                  ),
+                                );
+                              } else if (foster == true) {
+                                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: Text('Cannot Feed'),
+                      content: Text('Your customer was fostered.'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                        ),
+                      ],
+                    ),
+                );
+                              }
+                              else if (canCook()) {
                                 _saveLastCookTime();
                               // Action for Button 1
                                 Navigator.pop(context); // Close modal sheet
                               // Add your custom action here
                                 feed2();
-                              } else {
+                              } 
+                              
+                              else {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) => AlertDialog(
@@ -680,7 +795,40 @@ class _MainPageState extends State<MainPage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              if (canCook()) {
+                              if (sleep == true) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) => AlertDialog(
+                                  title: Text('Cannot Feed'),
+                                  content: Text('Your customer is sleeping'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                  ),
+                                );
+                              } else if (foster == true) {
+                                showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: Text('Cannot Feed'),
+                      content: Text('Your customer was fostered.'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('OK'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                        ),
+                      ],
+                    ),
+                );
+                              }
+                              else if (canCook()) {
                                 _saveLastCookTime();
                               // Action for Button 1
                                 Navigator.pop(context); // Close modal sheet
@@ -854,10 +1002,38 @@ class _MainPageState extends State<MainPage> {
             onPressed: () {
              Navigator.push(
                 context, 
-                MaterialPageRoute(builder: (context) => Petshop(widget.user)),
+                MaterialPageRoute(builder: (context) => Petshop(widget.user, widget.achievements)),
               );
             },
             iconSize: 400,
+          ),
+        ),
+
+        Positioned(
+          top: size.height * 0.155, // Adjust position from bottom
+          right: size.width * 0.18,
+          child: Text(
+            '$healthValue/100',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.none,
+            ),
+          ),
+        ),
+
+        Positioned(
+          top: size.height * 0.105, // Adjust position from bottom
+          right: size.width * 0.18,
+          child: Text(
+            '$growthValue/150',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.none,
+            ),
           ),
         ),
       ],

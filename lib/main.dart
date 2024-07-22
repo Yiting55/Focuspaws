@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 //import 'package:focuspaws/features/app/splash_screen/splash_screen.dart';
 //import 'package:focuspaws/features/login_page.dart';
 import 'package:flutter_application_1/features/onboarding/onboarding_view.dart';
-
+import 'package:flutter_application_1/features/pet/achievement.dart';
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -48,19 +48,38 @@ class MyApp extends StatelessWidget {
       home: StreamBuilder<User?>(
         stream: Auth().authStateChanges,
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+                print('Error loading pet and achievements: ${snapshot.error}');
+              }
           if (snapshot.hasData) {
             User user = snapshot.data!;
-            return FutureBuilder<Pet?>(
-              future: loadPetData(user),
+            return FutureBuilder<PetAndAchievements?>(
+              future: loadPetAndAchievements(user),
               builder: (context, petSnapshot) {
                 if (petSnapshot.connectionState == ConnectionState.waiting) {
                   return CircularProgressIndicator();
                 }
                 if (petSnapshot.hasData) {
-                  Pet dog = petSnapshot.data!;
-                  return MainPage(dog, user);
+                  PetAndAchievements data = petSnapshot.data!;
+                  Pet? dog = data.pet;
+                  if (dog == null) {
+                    List<Achievement> achievements = [];
+                    return Petshop(user, achievements);
+                  }
+                  List<Achievement> achievements = data.achievements;
+                  bool sleep = data.sleep;
+                  bool foster = data.foster;
+                  DateTime sleepTime = data.sleepTime;
+                  DateTime cookTime = data.cookTime;
+                  DateTime fosterTime = data.fosterTime;
+                  return MainPage(dog, user, achievements, sleep, foster,
+                  sleepTime, cookTime, fosterTime);
                 } else {
-                  return Petshop(user);
+                  List<Achievement> achievements = [];
+                  return Petshop(user, achievements);
                 }
               },
             );
@@ -70,39 +89,100 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-}     
-
-Future<void> savePetData(User user, Pet pet) async {
+}  
+ Future<PetAndAchievements> loadPetAndAchievements(User user) async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  await firestore.collection('pets').doc(user.uid).set({
-    'type': pet.runtimeType.toString(),
-    // Add any other necessary pet data here
-  });
-}
 
-Future<Pet?> loadPetData(User user) async {
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  DocumentSnapshot snapshot = await firestore.collection('pets').doc(user.uid).get();
+  try {
+    DocumentSnapshot userSnapshot = await firestore.collection('users').doc(user.uid).get();
+    Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+    if (userData == null) throw Exception('User data is null');
 
-  if (snapshot.exists) {
-    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-    String type = data['type'];
+    // Handle pet data
+    Pet? pet;
+    if (userData['pet'] != null) {
+      pet = Pet.fromMap(userData['pet'] as Map<String, dynamic>);
+    }
 
-    if (type == 'Corgi') {
-      return Corgi();
+    // Handle boolean values
+    bool sleep = userData['sleep'] ?? false;
+    bool foster = userData['foster'] ?? false;
+
+    // Handle timestamp fields
+    DateTime sleepTime = (userData['sleepTime'] as Timestamp?)?.toDate() ?? DateTime.now().subtract(const Duration(hours: 13));
+    DateTime cookTime = (userData['cookTime'] as Timestamp?)?.toDate() ?? DateTime.now().subtract(const Duration(hours: 7));
+    DateTime fosterTime = (userData['fosterTime'] as Timestamp?)?.toDate() ?? DateTime.now().subtract(const Duration(days:8));
+
+    // Handle achievements
+    List<Achievement> achievements = [];
+    if (userData['achievements'] != null) {
+      achievements = (userData['achievements'] as List)
+          .map((a) => Achievement.fromMap(a as Map<String, dynamic>))
+          .toList();
     }
-    if (type == 'Samoyed') {
-      return Samoyed();
-    }
-    if (type == 'GoldenRetriever') {
-      return GoldenRetriever();
-    }
-    // Handle other pet types as necessary
+
+    return PetAndAchievements(
+      pet: pet,
+      achievements: achievements,
+      sleep: sleep,
+      foster: foster,
+      sleepTime: sleepTime,
+      cookTime: cookTime,
+      fosterTime: fosterTime,
+    );
+  } catch (e) {
+    print('Failed to load pet and achievements: $e');
+    return PetAndAchievements(
+      pet: null,
+      achievements: [],
+      sleep: false,
+      foster: false,
+      sleepTime: DateTime.now().subtract(const Duration(hours: 13)),
+      cookTime: DateTime.now().subtract(const Duration(hours: 7)),
+      fosterTime: DateTime.now().subtract(const Duration(days: 8)),
+    );
   }
-  return null;
 }
 
-void updatePet(User user, Pet newPet) {
-  savePetData(user, newPet);
-  // Call setState in the appropriate widget to update the UI
+
+
+
+class PetAndAchievements {
+  final Pet? pet;
+  final List<Achievement> achievements;
+  bool sleep;
+  bool foster;
+  DateTime sleepTime;
+  DateTime cookTime;
+  DateTime fosterTime;
+
+
+  PetAndAchievements({required this.pet, required this.achievements, 
+  required this.sleep, required this.foster, 
+  required this.sleepTime, required this.cookTime, required this.fosterTime});
+
+   Map<String, dynamic> toMap() {
+    return {
+      'pet': pet?.toMap(),
+      'achievements': achievements.map((a) => a.toMap()).toList(),
+      'sleep': sleep,
+      'foster': foster,
+      'sleepTime': sleepTime.toIso8601String(),
+      'cookTime': cookTime.toIso8601String(),
+      'fosterTime': fosterTime.toIso8601String(),
+    };
+  }
+
+  // Factory method to create an instance from a map
+  factory PetAndAchievements.fromMap(Map<String, dynamic> map) {
+    return PetAndAchievements(
+      pet: map['pet'] != null ? Pet.fromMap(map['pet']) : null,
+      achievements: (map['achievements'] as List).map((a) => Achievement.fromMap(a)).toList(),
+      sleep: map['sleep'] ?? false,
+      foster: map['foster'] ?? false,
+      sleepTime: DateTime.parse(map['sleepTime']),
+      cookTime: DateTime.parse(map['cookTime']),
+      fosterTime: DateTime.parse(map['fosterTime']),
+    );
+  }
 }

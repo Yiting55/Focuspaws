@@ -1,14 +1,15 @@
 // ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously, unused_local_variable
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/pages/main_page.dart';
 import 'package:flutter_application_1/features/pages/petshop.dart';
-import 'package:flutter_application_1/features/pet/pet.dart';
 import 'package:flutter_application_1/features/user_auth/forgotpassword_page.dart';
 //import 'package:focuspaws/features/user_auth/register_page.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:flutter_application_1/features/user_auth/user_auth.dart';
+import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/features/pages/main_page.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showRegisterPage;
@@ -41,18 +42,42 @@ class _LoginPageState extends State<LoginPage> {
         password: passwordController.text.trim(),
       );
       UserCredential userCredential = await Auth().signInWithEmailandPassword(
-      email: emailController.text.trim(), 
-      password: passwordController.text.trim(),
+        email: emailController.text.trim(), 
+        password: passwordController.text.trim(),
       );
-    User user = userCredential.user!;
-      Navigator.pop(context);
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(
-          builder: (context) {
-            return Petshop(user);
-          }),
-      );
+      User user = userCredential.user!;
+      PetAndAchievements petAndAchievements = await loadPetAndAchievements(user);
+      if (mounted) {
+        Navigator.pop(context);
+        if (petAndAchievements.pet != null) {
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(
+            builder: (context) {
+              return MainPage(
+                petAndAchievements.pet!, 
+                user, 
+                petAndAchievements.achievements, 
+                petAndAchievements.sleep, 
+                petAndAchievements.foster,
+                petAndAchievements.sleepTime, 
+                petAndAchievements.cookTime, 
+                petAndAchievements.fosterTime
+              );
+            }
+          ),
+        );
+        } else {
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(
+            builder: (context) {
+              return Petshop(user, petAndAchievements.achievements);
+            }),
+        );
+      }
+      }
+      
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
       
@@ -196,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
       borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: Colors.white)
     );    
-    return  TextField(
+    return TextField(
       style: const TextStyle(color: Colors.white),
       controller: passwordController,
       decoration: InputDecoration(

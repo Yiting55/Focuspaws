@@ -10,6 +10,9 @@ import "package:flutter_application_1/features/pet/pet.dart";
 import "package:smooth_page_indicator/smooth_page_indicator.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:flutter_application_1/features/user_auth/login_page.dart';
+import 'package:flutter_application_1/features/pet/achievement.dart';
+import 'package:flutter_application_1/features/pages/intro.dart';
+
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});
 
@@ -145,10 +148,11 @@ class _OnboardingViewState extends State<OnboardingView> {
           //if(!mounted)return;
           User? user = FirebaseAuth.instance.currentUser;
           if (user != null) {
+            List<Achievement> achievements = [];
             Navigator.pushReplacement(
               context, 
               MaterialPageRoute(
-                builder: (context) => Petshop(user),
+                builder: (context) => Intro(user, achievements),
               ),
             );
           } else {
