@@ -191,9 +191,9 @@ class SummaryPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const SizedBox(height: 10),
-                        _averageFocusTime(averageFocusTime),
                         const SizedBox(height: 20),
+                        _averageFocusTime(averageFocusTime),
+                        const SizedBox(height: 32),
                         _stackedBarChart(events),
                       ],
                     ),
@@ -246,7 +246,7 @@ class SummaryPage extends StatelessWidget {
               color: Colors.black),
           ),
           TextSpan(
-            text: '${averageFocusTime.toStringAsFixed(2)} minutes',
+            text: '${averageFocusTime.toStringAsFixed(1)} minutes /day',
             style: TextStyle(
               fontSize: 24, 
               fontWeight: FontWeight.bold,
@@ -312,8 +312,8 @@ class SummaryPage extends StatelessWidget {
                 rightTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true, 
-                    reservedSize: 28,
-                    interval: 2,
+                    reservedSize: 30,
+                    //interval: 2,
                     getTitlesWidget: (value, meta) {
                       if (value.toInt() % 2 == 0) {
                         return Text("${value.toInt()}'");
