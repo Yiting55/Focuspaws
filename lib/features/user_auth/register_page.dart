@@ -1,12 +1,9 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, avoid_print
 
-//import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/onboarding/onboarding_view.dart';
-//import 'package:focuspaws/features/user_auth/login_page.dart';
+import 'package:flutter_application_1/features/onboarding/onboarding_page.dart';
 import 'package:flutter_application_1/features/user_auth/user_auth.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -54,11 +51,12 @@ class _RegisterPageState extends State<RegisterPage> {
             'signupDate' : Timestamp.fromDate(DateTime.now()),
           });
         }
-        
+        if (mounted) {
           Navigator.pop(context);
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => OnboardingView()),
+            MaterialPageRoute(builder: (_) => OnboardingPage()),
           );
+        }
         
       } on FirebaseAuthException catch (e) {
         
@@ -74,12 +72,6 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
   }
-
-  //void toggleScreen() {
-    //setState(() {
-      //showLoginPage = !showLoginPage;
-    //});
-  //}
 
   bool passwordConfirmed() {
     if (passwordController.text.trim() == confirmpasswordController.text.trim()) {
@@ -248,7 +240,6 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: GestureDetector(
         onTap: signUp,
-      //onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
         child: Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -266,7 +257,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       ),
-      //Text(isLogin ? 'Sign in' : 'Register'),
     );
   }
 
@@ -285,9 +275,7 @@ class _RegisterPageState extends State<RegisterPage> {
               fontFamily: 'OpenSans'), 
           ),
           GestureDetector(
-            onTap: widget.showLoginPage,//(){
-              //Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
-            //},
+            onTap: widget.showLoginPage,        
             child: Text(
               'Login Now',
               style: TextStyle(
@@ -298,7 +286,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ],
       ),
-      //Text(isLogin ? 'Register instead' : 'Login instead'),
     );
   }
 }

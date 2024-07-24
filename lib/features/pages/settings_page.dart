@@ -1,10 +1,10 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, avoid_types_as_parameter_names, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, avoid_types_as_parameter_names, non_constant_identifier_names, unused_import
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/features/dog_knowledge/dogknowledge_page.dart';
-import 'package:flutter_application_1/features/pages/changelanguage_page.dart';
 import 'package:flutter_application_1/features/user_auth/changepassword_page.dart';
+import 'package:flutter_application_1/features/user_auth/signinorregister_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -61,22 +61,7 @@ class SettingsPage extends StatelessWidget {
               );
             },
           ),
-          // _settingsListItem(
-          //   context,
-          //   icon: Icons.language,
-          //   text: 'Change Language',
-          //   onTap: () async {
-          //     String? selectedLanguage = await Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => ChangeLanguagePage(setLocale: (Locale ) {  },)),
-          //     );
-          //     if (selectedLanguage != null) {
-          //       // Handle the selected language
-          //       // For example, you might want to save the preference and reload the app with the new language
-          //       // print('Selected Language: $selectedLanguage');
-          //     }
-          //   },
-          // ),
+          
           _settingsListItem(
             context,
             icon: Icons.pets,
@@ -94,7 +79,8 @@ class SettingsPage extends StatelessWidget {
             text: 'Logout',
             onTap: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              // Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => SigninOrRegisterPage()));
             },
           ),
         ],

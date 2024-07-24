@@ -1,27 +1,46 @@
-// ignore_for_file: unused_import
-
-import 'package:flutter_application_1/features/pet/set.dart';
+// ignore_for_file: unused_import, unnecessary_this, prefer_initializing_formals
+import 'dart:ui';
 import 'dart:async';
+import 'dart:core';
 
 class Pet {
   int health;
   int growth;
   bool alive;
   bool asleep;
-  String image; 
+  String image1;
+  String image2;
+  String image3;
+  String dead;
+  String? type;
+  DateTime? dateRaised;
+  String name;
 
-  Pet() 
-    : health = 80,
-      growth = 0,
+  Pet(String name, int health, int growth) 
+    : health = health,
+      growth = growth,
       asleep = false,
       alive = true,
-      image = 'assets/onboarding/functions/dog1.png';
-    
-  void sleep() {
-    asleep = true;
+      this.name = name,
+      image1 = 'assets/onboarding/puppy_kitty.jpeg',
+      image2 = 'assets/onboarding/puppy_kitty.jpeg',
+      image3 = 'assets/onboarding/puppy_kitty.jpeg',
+      dead = 'assets/onboarding/dead.png';
+
+   Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'health': health,
+      'growth': growth,
+    };
   }
 
-  void wake() {
-    asleep = false;
+  factory Pet.fromMap(Map<String, dynamic> map) {
+    return Pet(
+      map['name'],
+      map['health'],
+      map['growth'],
+    );
   }
+
 }

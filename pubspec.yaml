@@ -47,6 +47,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: any
+  firebase_auth_mocks: ^0.14.0
+  fake_cloud_firestore: ^3.0.1
 
 dev_dependencies:
   flutter_test:

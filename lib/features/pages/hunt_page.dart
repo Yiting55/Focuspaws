@@ -53,11 +53,11 @@ class HuntPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _levelButton(context, 'assets/onboarding/level1food.png', 'Level 1', 2),
+                _levelButton(context, 'assets/onboarding/level1food.png', 'Level 1', 30),
                 SizedBox(width: 15.0),
-                _levelButton(context, 'assets/onboarding/level2food.png', 'Level 2', 4),
+                _levelButton(context, 'assets/onboarding/level2food.png', 'Level 2', 60),
                 SizedBox(width: 15.0),
-                _levelButton(context, 'assets/onboarding/level3food.png', 'Level 3', 6),
+                _levelButton(context, 'assets/onboarding/level3food.png', 'Level 3', 90),
               ],
             ),
           ],

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/features/pages/focus_activity.dart';
 import 'package:flutter_application_1/features/pages/summary_page.dart';
 import 'package:table_calendar/table_calendar.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -88,31 +87,6 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
     );
   }
-
-  // void _showFocusDataDialog() {
-  //   showDialog(
-  //     context: context, 
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: Text('Focus Activities'),
-  //         content: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: _selectedEvents.map((event) => ListTile(
-  //             title: Text(event.name),
-  //             subtitle: Text('Duration: ${event.duration} seconds\nStatus: ${event.isSuccess ? 'Success' : 'Failure'}'),
-  //           )).toList(),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             }, 
-  //             child: Text('OK'),
-  //           )
-  //         ]
-  //       );
-  //     });
-  // }
 
   @override
   Widget build(BuildContext context) {

@@ -111,14 +111,6 @@ class FeedinfoPage extends StatelessWidget {
               fontFamily: 'Open Sans',
             ),
           ),
-          // SizedBox(height: 10.0),
-          // Text(
-          //   '• Dogs need constant access to clean, fresh water to stay hydrated and maintain good health.',
-          //   style: TextStyle(
-          //     fontSize: 18.0,
-          //     fontFamily: 'Open Sans',
-          //   ),
-          // ),
 
           SizedBox(height: 10.0),
           Text(
@@ -150,7 +142,6 @@ class FeedinfoPage extends StatelessWidget {
           ),
           SizedBox(height: 10.0),
           Text(
-            // "• Special Diets: Your vet can recommend diets tailored for specific health issues like kidney disease, diabetes, or gastrointestinal problems.\n"
             "• Regular Check-Ups: Ensure that your dog's nutritional needs are being met and adjust the diet as necessary.",
             style: TextStyle(
               fontSize: 18.0,

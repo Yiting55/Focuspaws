@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 // import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_application_1/features/pages/focus_activity.dart';
-// import 'package:flutter/widgets.dart';
-// import 'package:flutter/widgets.dart';
 
 class TimerPage extends StatefulWidget{
   final String level;
@@ -31,15 +29,6 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
 
   final TextEditingController _taskNameController = TextEditingController();
   String _taskName = '';
-
-  // final Map<int, Map<String, dynamic>> _foodRewards = {
-  //   1: {'category': 'Category 1 Veggie', 'icon': Icons.eco},
-  //   2: {'category': 'Category 1 Meat', 'icon': Icons.set_meal},
-  //   4: {'category': 'Category 2 Veggie', 'icon': Icons.local_florist},
-  //   6: {'category': 'Category 2 Meat', 'icon': Icons.restaurant},
-  //   9: {'category': 'Category 3 Veggie', 'icon': Icons.local_florist},
-  //   12: {'category': 'Category 3 Meat', 'icon': Icons.restaurant},
-  // };
 
   @override 
   void initState() {
@@ -94,7 +83,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
       _remainingTime = _totalTime;
     });
     // check the time chosen
-    if (_totalTime < widget.minTime) {
+    if (_totalTime < widget.minTime*60) {
       _invalidTimeDialog();
       return;
     }
@@ -222,7 +211,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
             padding: const EdgeInsets.symmetric(horizontal: 2.0),
             child: 
                 Text(
-                  'You have successfully focused for $_totalTime seconds.\nYou have obtained ${widget.level} food!',
+                  'You have successfully focused for the whole task! \nYou have obtained ${widget.level} food!',
                   style: TextStyle(
                     fontFamily: 'Open Sans',
                     fontSize: 18,
@@ -593,52 +582,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
       ],
     );
   }
-  // Widget _timerSlider() {
-  //   final slider = SleekCircularSlider(
-  //     min: 0,
-  //     max: 60,
-  //     initialValue: _totalTime / 60,
-  //     onChange: (double value) {
-  //       setState(() {
-  //         if(!_isRunning){
-  //           _resetTimer(value);
-  //         }
-  //       }); 
-  //     },
-  //     innerWidget: (double value) {
-  //       return Center(
-  //         child: ClipOval(
-  //               child: Image.asset(
-  //         'assets/onboarding/logo.png',
-  //         height: 600,
-  //         width: 600,
-  //         fit: BoxFit.cover,
-  //               ),
-  //             ),
-  //       );
-  //     },
-  //     //appearance of the slider or the progress bar 
-  //     appearance: CircularSliderAppearance(
-  //       size: 300,
-  //       startAngle: 270,
-  //       angleRange: 360,
-  //       customWidths: CustomSliderWidths(
-  //         handlerSize: 12,
-  //         progressBarWidth: 14,
-  //       ),
-  //       customColors: CustomSliderColors(
-  //         hideShadow: true,
-  //         trackColor: Color.fromARGB(255, 255, 130, 21),
-  //         progressBarColor: Color.fromARGB(255, 255, 130, 21)
-  //       )
-  //     ),
-  //   );
-
-  //   return slider;
-  // }
-
-
-
+  
   Widget _progressBar() {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0.0, end: _getProgress()),

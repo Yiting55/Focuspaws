@@ -102,7 +102,8 @@ class SummaryPage extends StatelessWidget {
   double _calculateAverageFocusTime(List<FocusActivity> events) {
     List<FocusActivity> successfulEvents = events.where((event) => event.isSuccess).toList();
     if (successfulEvents.isEmpty) return 0;
-    double totalFocusTime = successfulEvents.fold(0, (totalTime, event) => totalTime + event.duration);
+    double totalFocusTimeinSeconds = successfulEvents.fold(0, (totalTime, event) => totalTime + event.duration);
+    double totalFocusTime = totalFocusTimeinSeconds / 60.0;
 
     // Calculate active days
     Set<int> activeDays = successfulEvents.map((e) => e.timestamp.weekday).toSet();
@@ -245,7 +246,7 @@ class SummaryPage extends StatelessWidget {
               color: Colors.black),
           ),
           TextSpan(
-            text: '${averageFocusTime.toStringAsFixed(2)} hours',
+            text: '${averageFocusTime.toStringAsFixed(2)} minutes',
             style: TextStyle(
               fontSize: 24, 
               fontWeight: FontWeight.bold,
@@ -262,33 +263,33 @@ class SummaryPage extends StatelessWidget {
     Map<String, Map<String, int>> weeklyData = _getWeeklyData(events);
     List<BarChartGroupData> barGroups = [];
 
-    double maxHours = 0.0;
+    double maxMins = 0.0;
     List<String> orderedDays = ['7', '1', '2', '3', '4', '5', '6'];
 
     for (var day in orderedDays) {
-      double level1Hours = weeklyData[day]!['Level 1']!.toDouble();
-      double level2Hours = weeklyData[day]!['Level 2']!.toDouble();
-      double level3Hours = weeklyData[day]!['Level 3']!.toDouble();
-      double totalFocusHours = level1Hours + level2Hours + level3Hours;
-      // double remainingHours = maxHours - totalFocusHours;
-      if (totalFocusHours > maxHours) {
-        maxHours = totalFocusHours;
+      double level1Minutes = weeklyData[day]!['Level 1']!.toDouble() / 60.0;
+      double level2Minutes = weeklyData[day]!['Level 2']!.toDouble() / 60.0;
+      double level3Minutes = weeklyData[day]!['Level 3']!.toDouble() / 60.0;
+      double totalFocusMinutes = level1Minutes + level2Minutes + level3Minutes;
+      // double remainingHours = maxMins - totalFocusHours;
+      if (totalFocusMinutes > maxMins) {
+        maxMins = totalFocusMinutes;
       }
-      maxHours = ((maxHours / 2).ceil()) * 2;      
+      maxMins = ((maxMins / 2).ceil()) * 2;      
 
       barGroups.add(BarChartGroupData(
         x: int.parse(day),
         barRods: [
           BarChartRodData(
             borderRadius: BorderRadius.circular(16),
-            toY: maxHours,
+            toY: maxMins,
             color: const Color.fromARGB(96, 186, 186, 186),
             width: 16,
             rodStackItems: [
-              BarChartRodStackItem(0, level3Hours, Color.fromARGB(255, 18, 68, 109)),
-              BarChartRodStackItem(level3Hours, level3Hours + level2Hours, Color.fromARGB(255, 22, 103, 169)),
-              BarChartRodStackItem(level3Hours + level2Hours, totalFocusHours, Colors.lightBlue),
-              // BarChartRodStackItem(totalFocusHours, maxHours, Colors.white),
+              BarChartRodStackItem(0, level3Minutes, Color.fromARGB(255, 18, 68, 109)),
+              BarChartRodStackItem(level3Minutes, level3Minutes + level2Minutes, Color.fromARGB(255, 22, 103, 169)),
+              BarChartRodStackItem(level3Minutes + level2Minutes, totalFocusMinutes, Colors.lightBlue),
+              // BarChartRodStackItem(totalFocusHours, maxMins, Colors.white),
             ],
         ),],
       ));
@@ -301,7 +302,7 @@ class SummaryPage extends StatelessWidget {
           height: 300,
           child: BarChart(
             BarChartData(
-              maxY: maxHours,
+              maxY: maxMins,
               minY: 0,
               
               barGroups: barGroups,
@@ -315,7 +316,7 @@ class SummaryPage extends StatelessWidget {
                     interval: 2,
                     getTitlesWidget: (value, meta) {
                       if (value.toInt() % 2 == 0) {
-                        return Text('${value.toInt()}s');
+                        return Text("${value.toInt()}'");
                       } else {
                         return Text('');
                       }
@@ -357,13 +358,13 @@ class SummaryPage extends StatelessWidget {
                   // tooltipBgColor: Colors.grey,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     String day = orderedDays[group.x.toInt()];
-                    double level1Hours = weeklyData[day]!['Level 1']!.toDouble();
-                    double level2Hours = weeklyData[day]!['Level 2']!.toDouble();
-                    double level3Hours = weeklyData[day]!['Level 3']!.toDouble();
+                    double level1Minutes = weeklyData[day]!['Level 1']!.toDouble() / 60.0;
+                    double level2Minutes = weeklyData[day]!['Level 2']!.toDouble() / 60.0;
+                    double level3Minutes = weeklyData[day]!['Level 3']!.toDouble() / 60.0;
                     return BarTooltipItem(
-                      'Level 1: ${level1Hours.toStringAsFixed(2)} hrs\n'
-                      'Level 2: ${level2Hours.toStringAsFixed(2)} hrs\n'
-                      'Level 3: ${level3Hours.toStringAsFixed(2)} hrs',
+                      'Level 1: ${level1Minutes.toStringAsFixed(2)} Min\n'
+                      'Level 2: ${level2Minutes.toStringAsFixed(2)} Min\n'
+                      'Level 3: ${level3Minutes.toStringAsFixed(2)} Min',
                       TextStyle(color: Colors.white),
                     );
                   },
