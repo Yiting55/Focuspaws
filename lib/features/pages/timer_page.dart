@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, unnecessary_string_interpolations, prefer_final_fields, override_on_non_overriding_member, unused_element, avoid_print, unused_field, prefer_const_literals_to_create_immutables, collection_methods_unrelated_type
+// ignore_for_file: prefer_const_constructors, unnecessary_string_interpolations, prefer_final_fields, override_on_non_overriding_member, unused_element, avoid_print, unused_field, prefer_const_literals_to_create_immutables, collection_methods_unrelated_type, deprecated_member_use
 
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -58,23 +58,6 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
         });
       }
     }
-    // switch (state) {
-    //   case AppLifecycleState.resumed:
-    //     print("resumed");
-    //     break;
-    //   case AppLifecycleState.detached:
-    //     print("detached");
-    //     break;
-    //   case AppLifecycleState.inactive:
-    //     print("inactive");
-    //     break;
-    //   case AppLifecycleState.hidden:
-    //     print("hidden");
-    //     break;
-    //   case AppLifecycleState.paused:
-    //     print("paused");
-    //     break;
-    // }
   }
 
   void _startTimer() {
@@ -410,14 +393,27 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
           ],
           stops: [0.1, 0.3, 0.7, 0.9],
         )),
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: Text('Hunt'),
+      child: WillPopScope(
+        onWillPop: () async {
+          if(_timer != null) {
+            _timer?.cancel();
+          }
+          if (_isRunning) {
+            setState(() {
+              _stopTimer(false);
+            });
+          }
+          return true;
+        },
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            title: Text('Hunt'),
+            backgroundColor: Colors.transparent,
+          ),
           backgroundColor: Colors.transparent,
+          body: _page(),
         ),
-        backgroundColor: Colors.transparent,
-        body: _page(),
       ),  
     );
   }
