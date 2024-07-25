@@ -163,7 +163,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 //const SizedBox(height: 10),
                 _icon(),
                 //const SizedBox(height: 10),
-                _inputFieldEmail("Enter your Username", emailController),
+                _inputFieldEmail("Enter your Email", emailController),
                 const SizedBox(height: 10),
                 _inputFieldPassword("Enter your Password", passwordController, isPassword: true),
                 const SizedBox(height: 10),
