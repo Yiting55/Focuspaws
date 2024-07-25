@@ -1015,7 +1015,7 @@ class _MainPageState extends State<MainPage> {
                                   )),
                                 SizedBox(height: 5.0),
                                 Text(
-                                  '(Health + 20\nGrowth + 50)',
+                                  '(Health + 20\nGrowth + 1)',
                                   style: TextStyle(
                                     color: Color.fromARGB(255, 50, 50, 50),
                                     fontSize: 14,
