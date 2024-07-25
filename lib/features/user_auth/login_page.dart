@@ -181,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 _header(),
                 _icon(),            
-                _inputFieldEmail("Enter your Username", emailController),
+                _inputFieldEmail("Enter your Email", emailController),
                 const SizedBox(height: 10),
                 _inputFieldPassword("Enter your Password", passwordController, isPassword: true),
                 const SizedBox(height: 5),
