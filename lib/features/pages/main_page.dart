@@ -281,14 +281,14 @@ class _MainPageState extends State<MainPage> {
     await removeFoodOfLevel('Level 3');
     setState(() {
       if (healthValue >= 80) {
-      healthValue = 100;
-    } else {
-    healthValue += 20;
-    }
-    grow();
-    Pet pet = Pet(widget.pet.name, healthValue, growthValue);
-    savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
-    _lastSleepTime,_lastCookTime,_lastFosterTime);
+        healthValue = 100;
+      } else {
+      healthValue += 20;
+      }
+      grow();
+      Pet pet = Pet(widget.pet.name, healthValue, growthValue);
+      savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
+      _lastSleepTime,_lastCookTime,_lastFosterTime);
     });
   }
 
@@ -339,7 +339,7 @@ class _MainPageState extends State<MainPage> {
       if (growthValue >= 149) {
         growthValue = 150;
       } else {
-        growthValue += 50;
+        growthValue += 1;
       }
       Pet pet = Pet(widget.pet.name, healthValue, growthValue);
       savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
@@ -1210,7 +1210,7 @@ class _MainPageState extends State<MainPage> {
 
         // growth bar value
         Positioned(
-          top: size.height * 0.105, // Adjust position from bottom
+          top: size.height * 0.103, // Adjust position from bottom
           right: size.width * 0.21,
           child: Text(
             '$growthValue/150',

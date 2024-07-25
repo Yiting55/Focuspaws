@@ -3,14 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestableWidget extends StatefulWidget {
-  const TestableWidget({Key? key}) : super(key: key);
+class EmptyTaskNameWidget extends StatefulWidget {
+  const EmptyTaskNameWidget({Key? key}) : super(key: key);
 
   @override
   _TestableWidgetState createState() => _TestableWidgetState();
 }
 
-class _TestableWidgetState extends State<TestableWidget> {
+class _TestableWidgetState extends State<EmptyTaskNameWidget> {
   void _emptyTaskNameDialog() {
     showDialog(
       context: context,
@@ -74,7 +74,7 @@ class _TestableWidgetState extends State<TestableWidget> {
 void main() {
   testWidgets('Empty Task Name Dialog displays correctly', (WidgetTester tester) async {
     // Build the TestableWidget.
-    await tester.pumpWidget(MaterialApp(home: TestableWidget()));
+    await tester.pumpWidget(MaterialApp(home: EmptyTaskNameWidget()));
 
     // Tap the 'Show Dialog' button to trigger the dialog.
     await tester.tap(find.text('Show Dialog'));

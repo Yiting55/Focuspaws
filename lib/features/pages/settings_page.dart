@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/features/dog_knowledge/dogknowledge_page.dart';
+import 'package:flutter_application_1/features/pages/userguide_page.dart';
 import 'package:flutter_application_1/features/user_auth/changepassword_page.dart';
 import 'package:flutter_application_1/features/user_auth/signinorregister_page.dart';
 
@@ -50,6 +51,18 @@ class SettingsPage extends StatelessWidget {
       padding: const EdgeInsets.all(20.0),
       child: ListView(
         children: [
+          _settingsListItem(
+            context,
+            icon: Icons.lock,
+            text: 'Explore the Homepage',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GuidePage()),
+              );
+            },
+          ),
+
           _settingsListItem(
             context,
             icon: Icons.lock,

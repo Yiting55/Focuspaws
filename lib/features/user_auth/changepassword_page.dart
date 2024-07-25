@@ -41,6 +41,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   Future<void> _changePassword() async {
+    if (_oldPasswordController.text.trim().isEmpty) {
+        _showErrorDialog('Please enter your old password.');
+        return;
+      }
+    if (_newPasswordController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter a new password.');
+      return;
+    }
+    if (_confirmNewPasswordController.text.trim().isEmpty) {
+      _showErrorDialog('Please repeat entering your new password.');
+      return;
+    }
     if (_passwordsMatch()) {
       showDialog(
         context: context,
@@ -99,22 +111,33 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         Navigator.pop(context);
         String errorMessage = 'An error occurred';
         if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
-          errorMessage = 'The user password is wrong';
+          errorMessage = 'The old password is wrong.';
         } else if (e.code == 'weak-password') {
           errorMessage = 'The password provided is too weak.';
         } else if (e.code == 'requires-recent-login') {
           errorMessage = 'Please re-login and try again.';
         }
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text(errorMessage),
-            );
-          },
-        );
+        _showErrorDialog(errorMessage);
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

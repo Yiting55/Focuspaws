@@ -134,7 +134,7 @@ class Intro extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
                 title: Text('Foster button'),
-                content: Text("On pressed, you will be able to foster your pet for a maximun of 10 days. \nWhen your pet is fostered, it's health value will be fixed at 80. \nIf already fostered, press it again to get it back. \nPlease note that time betwwen two fosters is at least 7 days."),
+                content: Text("On pressed, you will be able to foster your pet for a maximun of 10 days. \nWhen your pet is fostered, its health value will be fixed at 80. \nIf already fostered, press it again to get it back. \nPlease note that time betwwen two fosters is at least 7 days."),
                 actions: <Widget>[
                   TextButton(
                     child: Text('OK'),

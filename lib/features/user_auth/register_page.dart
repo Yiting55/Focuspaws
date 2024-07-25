@@ -28,6 +28,14 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> signUp() async {
+    if (emailController.text.trim().isEmpty) {
+        _showErrorDialog('Please enter an email address.');
+        return;
+      }
+    if (passwordController.text.trim().isEmpty) {
+      _showErrorDialog('Please enter a password.');
+      return;
+    }
     if (passwordConfirmed()) {
 
       showDialog(
@@ -62,15 +70,45 @@ class _RegisterPageState extends State<RegisterPage> {
         
         Navigator.pop(context);
         
-        showDialog(
-        context: context, 
-        builder: (context) {
-          return AlertDialog(
-            content: Text(e.code),
-          );
-        });
+        String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found for that email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Wrong password provided for that user.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'The email address is not valid.';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'Please enter a valid email or password.';
+          break;
+        default:
+          errorMessage = e.code;
+          break;
+      }
+      _showErrorDialog(errorMessage);
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   bool passwordConfirmed() {
