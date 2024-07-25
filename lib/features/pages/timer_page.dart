@@ -564,7 +564,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
             onSelectedItemChanged: (index) => setState(() {
               _selectedSeconds = index;
             }), 
-            children: List<Widget>.generate(11, (index) {
+            children: List<Widget>.generate(1, (index) {
               return Center(
                 child: Text(
                 index.toString(),
