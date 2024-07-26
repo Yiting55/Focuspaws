@@ -88,9 +88,9 @@ class _MainPageState extends State<MainPage> {
     ) async {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
   try {
-    print('Saving data for user ID: ${user.uid}');
+    print('Saving data for user ID: ${user.email}');
     
-    await firestore.collection('users').doc(user.uid).set({
+    await firestore.collection('users').doc(user.email).set({
       'pet': pet.toMap(), // Ensure Pet class has a toMap method to convert it to a Map
       'achievements': achievements.map((a) => a.toMap()).toList(), // Ensure Achievement class has a toMap method
       'sleep': sleep,
@@ -297,7 +297,7 @@ class _MainPageState extends State<MainPage> {
     if (currentUser != null) {
       CollectionReference userFoodCollection = FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUser.uid)
+          .doc(currentUser.email)
           .collection('foods');
 
       QuerySnapshot querySnapshot = await userFoodCollection
@@ -314,7 +314,7 @@ class _MainPageState extends State<MainPage> {
     if (currentUser != null) {
       CollectionReference userFoodCollection = FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
+        .doc(currentUser.email)
         .collection('foods');
         
       QuerySnapshot querySnapshot = await userFoodCollection
