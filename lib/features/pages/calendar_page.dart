@@ -37,12 +37,12 @@ class _CalendarPageState extends State<CalendarPage> {
     if (currentUser != null) {
       CollectionReference activities = FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
+        .doc(currentUser.email)
         .collection('allFocusActivity');   
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
+        .doc(currentUser.email)
         .get();
       setState(() {
         _signupDate = (userDoc.data() as Map<String, dynamic>)['signupDate'].toDate();
