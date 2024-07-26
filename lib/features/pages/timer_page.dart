@@ -135,7 +135,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
       );
       CollectionReference allFocusActivity = FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
+        .doc(currentUser.email)
         .collection('allFocusActivity');
       await allFocusActivity.add(focusActivity.toMap());
       if (isSuccess) {
@@ -151,7 +151,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver{
       DateTime expiryDate = DateTime.now().add(Duration(days: 2));
       CollectionReference userFoodCollection = FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
+        .doc(currentUser.email)
         .collection('foods');
     
       // check if the food item already exists
