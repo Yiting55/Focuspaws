@@ -30,7 +30,7 @@ class _BagPageState extends State<BagPage> {
 
     CollectionReference userFoodCollection = FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser.uid)
+        .doc(currentUser.email)
         .collection('foods');
 
     QuerySnapshot querySnapshot = await userFoodCollection.get();
