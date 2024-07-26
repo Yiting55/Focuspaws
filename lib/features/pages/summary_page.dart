@@ -55,7 +55,7 @@ class SummaryPage extends StatelessWidget {
     if (currentUser != null) {
       CollectionReference activities = FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUser.uid)
+          .doc(currentUser.email)
           .collection('allFocusActivity');
 
       QuerySnapshot snapshot = await activities.get();
