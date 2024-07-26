@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   try {
-    DocumentSnapshot userSnapshot = await firestore.collection('users').doc(user.uid).get();
+    DocumentSnapshot userSnapshot = await firestore.collection('users').doc(user.email).get();
     Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
     if (userData == null) throw Exception('User data is null');
 
