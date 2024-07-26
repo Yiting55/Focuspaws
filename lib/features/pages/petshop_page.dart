@@ -192,9 +192,9 @@ Future<void> savePetAndAchievements(
 ) async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   try {
-    print('Saving data for user ID: ${user.uid}');
+    print('Saving data for user ID: ${user.email}');
     
-    await firestore.collection('users').doc(user.uid).set({
+    await firestore.collection('users').doc(user.email).set({
       'pet': pet.toMap(), // Ensure Pet class has a toMap method to convert it to a Map
       'achievements': achievements.map((a) => a.toMap()).toList(), // Ensure Achievement class has a toMap method
       'sleep': sleep,
