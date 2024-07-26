@@ -55,7 +55,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // store the signup date in the Firestore
         User? user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          await FirebaseFirestore.instance.collection('users').doc(user.email).set({
             'signupDate' : Timestamp.fromDate(DateTime.now()),
           });
         }
