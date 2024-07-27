@@ -214,7 +214,7 @@ class _MainPageState extends State<MainPage> {
   bool canCook() {
     DateTime now = DateTime.now();
     Duration difference = now.difference(_lastCookTime);
-    return difference.inSeconds >= 3600*6;
+    return difference.inSeconds >= 1;
   }
 
   bool cansleep() {
@@ -286,6 +286,7 @@ class _MainPageState extends State<MainPage> {
       healthValue += 20;
       }
       grow();
+      growthValue = 150;
       Pet pet = Pet(widget.pet.name, healthValue, growthValue);
       savePetAndAchievements(widget.user, pet, this.achievements,  sleep, foster, 
       _lastSleepTime,_lastCookTime,_lastFosterTime);
@@ -490,7 +491,7 @@ class _MainPageState extends State<MainPage> {
           right: size.width * 0.02, // Adjust position from right
           child: IconButton(
             icon: Image.asset(
-              'assets/onboarding/functions/foster.png', // Replace with your own image path
+              'assets/onboarding/functions/fostering.png', // Replace with your own image path
               width: 50, // Adjust size as needed
               height: 50,
               fit: BoxFit.fill,
@@ -514,11 +515,11 @@ class _MainPageState extends State<MainPage> {
                               }
               else if (foster == false && canfoster()) {
                 beFostered();
-                _saveLastFosterTime();
               } 
               else if (foster ==  true) {
                 back();
                 startTimer();
+                _saveLastFosterTime();
               } 
               else {
                 showDialog(
@@ -551,7 +552,7 @@ class _MainPageState extends State<MainPage> {
           right: size.width * 0.02, // Adjust position from right
           child: IconButton(
             icon: Image.asset(
-              'assets/onboarding/functions/sleep.png', // Replace with your own image path
+              'assets/onboarding/functions/sleeping.png', // Replace with your own image path
               width: 50, // Adjust size as needed
               height: 50,
               fit: BoxFit.fill,
@@ -592,10 +593,10 @@ class _MainPageState extends State<MainPage> {
               }
               else if (cansleep() && sleep == false) {
                 beSlept();
-                _saveLastSleepTime();
               } else if (sleep == true) {
                 wake();
                 startTimer();
+                _saveLastSleepTime();
               } 
               else if (!cansleep() || foster == false){
                 showDialog(
