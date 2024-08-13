@@ -1,10 +1,12 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, avoid_print
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
+//import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/onboarding/onboarding_page.dart';
-import 'package:flutter_application_1/features/user_auth/user_auth.dart';
+import 'package:focuspaws/features/onboarding/onboarding_view.dart';
+//import 'package:focuspaws/features/user_auth/login_page.dart';
+import 'package:focuspaws/features/user_auth/user_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   final VoidCallback showLoginPage;
@@ -15,6 +17,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  String? errorMessage = '';
+
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmpasswordController = TextEditingController();
@@ -28,14 +32,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> signUp() async {
-    if (emailController.text.trim().isEmpty) {
-        _showErrorDialog('Please enter an email address.');
-        return;
-      }
-    if (passwordController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter a password.');
-      return;
-    }
     if (passwordConfirmed()) {
 
       showDialog(
@@ -51,65 +47,30 @@ class _RegisterPageState extends State<RegisterPage> {
           email: emailController.text, 
           password: passwordController.text,
         );
-
-        // store the signup date in the Firestore
-        User? user = FirebaseAuth.instance.currentUser;
-        if (user != null) {
-          await FirebaseFirestore.instance.collection('users').doc(user.email).set({
-            'signupDate' : Timestamp.fromDate(DateTime.now()),
-          });
-        }
-        if (mounted) {
-          Navigator.pop(context);
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => OnboardingPage()),
-          );
-        }
         
+        Navigator.pop(context);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => OnboardingView()));
+      
       } on FirebaseAuthException catch (e) {
         
         Navigator.pop(context);
         
-        String errorMessage;
-      switch (e.code) {
-        case 'user-not-found':
-          errorMessage = 'No user found for that email.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Wrong password provided for that user.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'invalid-credential':
-          errorMessage = 'Please enter a valid email or password.';
-          break;
-        default:
-          errorMessage = e.code;
-          break;
-      }
-      _showErrorDialog(errorMessage);
+        showDialog(
+        context: context, 
+        builder: (context) {
+          return AlertDialog(
+            content: Text(e.code),
+          );
+        });
       }
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //void toggleScreen() {
+    //setState(() {
+      //showLoginPage = !showLoginPage;
+    //});
+  //}
 
   bool passwordConfirmed() {
     if (passwordController.text.trim() == confirmpasswordController.text.trim()) {
@@ -163,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 //const SizedBox(height: 10),
                 _icon(),
                 //const SizedBox(height: 10),
-                _inputFieldEmail("Enter your Email", emailController),
+                _inputFieldEmail("Enter your Username", emailController),
                 const SizedBox(height: 10),
                 _inputFieldPassword("Enter your Password", passwordController, isPassword: true),
                 const SizedBox(height: 10),
@@ -278,6 +239,7 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: GestureDetector(
         onTap: signUp,
+      //onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
         child: Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -295,6 +257,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ),
       ),
+      //Text(isLogin ? 'Sign in' : 'Register'),
     );
   }
 
@@ -313,7 +276,9 @@ class _RegisterPageState extends State<RegisterPage> {
               fontFamily: 'OpenSans'), 
           ),
           GestureDetector(
-            onTap: widget.showLoginPage,        
+            onTap: widget.showLoginPage,//(){
+              //Navigator.of(context).push(MaterialPageRoute(builder: (_) => LoginPage()));
+            //},
             child: Text(
               'Login Now',
               style: TextStyle(
@@ -324,6 +289,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         ],
       ),
+      //Text(isLogin ? 'Register instead' : 'Login instead'),
     );
   }
 }

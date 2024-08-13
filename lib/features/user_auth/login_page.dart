@@ -1,12 +1,11 @@
-// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, unused_element, file_names, prefer_const_literals_to_create_immutables, use_build_context_synchronously
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/pages/petshop_page.dart';
-import 'package:flutter_application_1/features/user_auth/forgotpassword_page.dart';
-import 'package:flutter_application_1/features/user_auth/user_auth.dart';
-import 'package:flutter_application_1/main.dart';
-import 'package:flutter_application_1/features/pages/main_page.dart';
+import 'package:focuspaws/features/user_auth/forgotpassword_page.dart';
+//import 'package:focuspaws/features/user_auth/register_page.dart';
+//import 'package:flutter/widgets.dart';
+import 'package:focuspaws/features/user_auth/user_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback showRegisterPage;
@@ -25,15 +24,6 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   Future<void> signIn() async {
-    
-    if (emailController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter an email address.');
-      return;
-      }
-    if (passwordController.text.trim().isEmpty) {
-      _showErrorDialog('Please enter a password.');
-      return;
-    }
     showDialog(
       context: context, 
       builder: (context){
@@ -47,84 +37,25 @@ class _LoginPageState extends State<LoginPage> {
         email: emailController.text.trim(), 
         password: passwordController.text.trim(),
       );
-      UserCredential userCredential = await Auth().signInWithEmailandPassword(
-        email: emailController.text.trim(), 
-        password: passwordController.text.trim(),
-      );
-      User user = userCredential.user!;
-      PetAndAchievements petAndAchievements = await loadPetAndAchievements(user);
-      if (mounted) {
-        Navigator.pop(context);
-        if (petAndAchievements.pet != null) {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(
-            builder: (context) {
-              return MainPage(
-                petAndAchievements.pet!, 
-                user, 
-                petAndAchievements.achievements, 
-                petAndAchievements.sleep, 
-                petAndAchievements.foster,
-                petAndAchievements.sleepTime, 
-                petAndAchievements.cookTime, 
-                petAndAchievements.fosterTime
-              );
-            }
-          ),
-        );
-        } else {
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(
-            builder: (context) {
-              return Petshop(user, petAndAchievements.achievements);
-            }),
-        );
-      }
-      }
-      
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);
-      String errorMessage;
-      switch (e.code) {
-        case 'user-not-found':
-          errorMessage = 'No user found for that email.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Wrong password provided for that user.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'The email address is not valid.';
-          break;
-        case 'invalid-credential':
-          errorMessage = 'Please enter a valid email or password.';
-          break;
-        default:
-          errorMessage = e.code;
-          break;
-      }
-      _showErrorDialog(errorMessage);
+      
+      showDialog(
+        context: context, 
+        builder: (context) {
+          return AlertDialog(
+            content: Text(e.code),
+          );
+        });
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //void toggleScreen() {
+    //setState(() {
+      //showLoginPage = !showLoginPage;
+    //});
+  //}
 
   @override 
   void dispose() {
@@ -180,8 +111,10 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 _header(),
-                _icon(),            
-                _inputFieldEmail("Enter your Email", emailController),
+                //const SizedBox(height: 0),
+                _icon(),
+                //const SizedBox(height: 0),
+                _inputFieldEmail("Enter your Username", emailController),
                 const SizedBox(height: 10),
                 _inputFieldPassword("Enter your Password", passwordController, isPassword: true),
                 const SizedBox(height: 5),
@@ -248,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
       borderRadius: BorderRadius.circular(20),
       borderSide: const BorderSide(color: Colors.white)
     );    
-    return TextField(
+    return  TextField(
       style: const TextStyle(color: Colors.white),
       controller: passwordController,
       decoration: InputDecoration(
@@ -272,6 +205,7 @@ class _LoginPageState extends State<LoginPage> {
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: GestureDetector(
         onTap: signIn,
+      //onPressed: isLogin ? signInWithEmailAndPassword : createUserWithEmailAndPassword,
         child: Container(
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -289,6 +223,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
+      //Text(isLogin ? 'Sign in' : 'Register'),
     );
   }
 
@@ -310,7 +245,9 @@ class _LoginPageState extends State<LoginPage> {
               fontFamily: 'OpenSans'), 
           ),
           GestureDetector(
-            onTap: widget.showRegisterPage,
+            onTap: widget.showRegisterPage,//(){
+              //Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage()));
+            //},
             child: Text(
               'Register Now',
               style: TextStyle(

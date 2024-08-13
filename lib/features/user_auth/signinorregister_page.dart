@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/features/user_auth/login_page.dart';
-import 'package:flutter_application_1/features/user_auth/register_page.dart';
+//import 'package:focuspaws/features/Login_page.dart';
+import 'package:focuspaws/features/user_auth/login_page.dart';
+import 'package:focuspaws/features/user_auth/register_page.dart';
 
 class SigninOrRegisterPage extends StatefulWidget {
   const SigninOrRegisterPage({super.key});

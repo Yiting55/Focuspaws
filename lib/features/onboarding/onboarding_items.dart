@@ -1,9 +1,9 @@
-import 'package:flutter_application_1/features/onboarding/onboarding_info.dart';
+import 'package:focuspaws/features/onboarding/onboarding_info.dart';
 
 class OnboardingItems{
   List<OnboardingInfo> items = [
     OnboardingInfo(
-      title: "Understand Their Burdens", 
+      title: "Understand Their Burdons", 
       description: "Every year, many cats and dogs return to their respective stars, carrying the weight of the pain and sorrow they have endured during their lifetimes. These burdens cause great distress to their souls, causing them to suffer from worse degeneration.",
       image: "assets/onboarding/flying_dog.jpeg"),
     
